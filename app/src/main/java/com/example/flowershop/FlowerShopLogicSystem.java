@@ -1,7 +1,6 @@
 package com.example.flowershop;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Scanner;
 
 public class FlowerShopLogicSystem {
@@ -105,13 +104,14 @@ public class FlowerShopLogicSystem {
             String catChoice = sc.nextLine();
             if (catChoice.equals("0")) break;
 
-            String targetCat = switch (catChoice) {
-                case "1" -> "Hoa chuc mung";
-                case "2" -> "Hoa sinh nhat";
-                case "3" -> "Chia buon";
-                case "4" -> "Hoa bo";
-                default -> "";
-            };
+            String targetCat;
+            switch (catChoice) {
+                case "1": targetCat = "Hoa chuc mung"; break;
+                case "2": targetCat = "Hoa sinh nhat"; break;
+                case "3": targetCat = "Chia buon"; break;
+                case "4": targetCat = "Hoa bo"; break;
+                default: targetCat = "";
+            }
 
             if (targetCat.isEmpty()) continue;
 
@@ -156,9 +156,9 @@ public class FlowerShopLogicSystem {
         System.out.print("\nBan co ma giam gia khong? (Nhap ma hoac bo qua): ");
         String voucher = sc.nextLine();
         double discount = 0;
-        if (voucher.equalsIgnoreCase("4AE_FREE")) {
+        if (voucher.equalsIgnoreCase("4THANGGAY")) {
             discount = 50000; // Giam 50k
-            System.out.println(">> Da ap dung ma 4AE_FREE: Giam 50,000 VND");
+            System.out.println(">> Da ap dung ma 4THANGGAY: Giam 50,000 VND");
         }
 
         System.out.println("[1] Tai quay | [2] Giao hang (+35k ship)");
