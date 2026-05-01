@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Hồng đậm -> Hồng đào -> Hồng pastel -->
+    <gradient
+        android:startColor="#E35A8C"
+        android:centerColor="#F8BBD0"
+        android:endColor="#FFFFFF"
+        android:angle="270" />
+
+</shape>
