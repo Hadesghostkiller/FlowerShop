@@ -1,98 +1,197 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#FFFFFF">
+    android:background="@drawable/bg_gradient">
 
-    <!-- Header -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="#E91E63">
+    <!-- Lottie -->
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lottieTop"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        app:lottie_rawRes="@raw/flower"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"/>
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Dang nhap"
-            android:textSize="22sp"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-
-    <!-- Logo -->
-    <ImageView
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="32dp"
-        android:src="@android:drawable/ic_menu_gallery"
-        android:background="#FFEEEE"/>
-
+    <!-- Welcome -->
     <TextView
+        android:id="@+id/tvWelcome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Flower Shop"
-        android:textSize="28sp"
+        android:text="The place where love begins"
+        android:textSize="22sp"
+        android:fontFamily="@font/poppins_regular"
         android:textStyle="bold"
-        android:textColor="#E91E63"
-        android:layout_marginTop="16dp"/>
+        android:textColor="#D81B60"
+        android:layout_below="@id/lottieTop"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"/>
 
-    <!-- Login Form -->
+    <!-- CARD -->
     <LinearLayout
+        android:id="@+id/cardLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingHorizontal="24dp"
+        android:paddingTop="28dp"
+        android:paddingBottom="24dp"
+        android:layout_below="@id/tvWelcome"
+        android:layout_marginTop="30dp"
+        android:layout_marginHorizontal="24dp"
+        android:background="@drawable/bg_card">
 
+        <!-- Gmail (Đã đổi từ Username sang Gmail) -->
         <EditText
-            android:id="@+id/etUsername"
+            android:id="@+id/etGmail"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Ten dang nhap"
-            android:inputType="text"
-            android:padding="16dp"
-            android:background="@android:drawable/edit_text"/>
+            android:layout_height="52dp"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:fontFamily="@font/poppins_regular"
+            android:textColorHint="#888888"
+            android:paddingHorizontal="16dp"
+            android:background="@drawable/bg_edittext"
+            android:layout_marginBottom="16dp"/>
 
+        <!-- Password -->
         <EditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Mat khau"
+            android:layout_height="52dp"
+            android:hint="Password"
+            android:fontFamily="@font/poppins_regular"
+            android:textColorHint="#888888"
             android:inputType="textPassword"
-            android:padding="16dp"
-            android:layout_marginTop="16dp"
-            android:background="@android:drawable/edit_text"/>
+            android:paddingHorizontal="16dp"
+            android:background="@drawable/bg_edittext"
+            android:layout_marginBottom="10dp"/>
 
+        <!-- Error -->
+        <TextView
+            android:id="@+id/tvError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#D32F2F"
+            android:textSize="13sp"
+            android:gravity="center"
+            android:textStyle="italic"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Login -->
         <Button
             android:id="@+id/btnLogin"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Dang nhap"
-            android:backgroundTint="#E91E63"
-            android:layout_marginTop="24dp"/>
+            android:layout_height="50dp"
+            android:text="Sign in"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="@font/poppins_regular"
+            android:textStyle="bold"
+            android:background="@drawable/bg_button"
+            app:backgroundTint="#C2185B"
+            android:layout_marginBottom="20dp"/>
 
-        <Button
+        <!-- OR -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Or"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#66000000"
+            android:layout_gravity="center"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Social -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:layout_marginBottom="24dp">
+
+            <ImageView
+                android:id="@+id/btnGoogleLogin"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_google"
+                android:background="@drawable/bg_social"
+                android:padding="8dp"
+                android:layout_marginHorizontal="12dp"/>
+
+            <ImageView
+                android:id="@+id/btnFacebookLogin"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_facebook"
+                android:background="@drawable/bg_social"
+                android:padding="8dp"
+                android:layout_marginHorizontal="12dp"/>
+
+            <ImageView
+                android:id="@+id/btnXLogin"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_x"
+                android:background="@drawable/bg_social"
+                android:padding="8dp"
+                android:layout_marginHorizontal="12dp"/>
+        </LinearLayout>
+
+        <!-- Register -->
+        <TextView
             android:id="@+id/btnRegister"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dang ky tai khoan moi"
-            android:layout_marginTop="8dp"
-            style="@style/Widget.Material3.Button.OutlinedButton"/>
+            android:text="Chưa có tài khoản? Tạo mới"
+            android:textColor="#D81B60"
+            android:fontFamily="@font/poppins_regular"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:layout_gravity="center"
+            android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/bg_ripple"/>
 
+        <TextView
+            android:id="@+id/tvForgotPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quên mật khẩu?"
+            android:textColor="#D81B60"
+            android:fontFamily="@font/poppins_regular"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:layout_gravity="center"
+            android:layout_marginTop="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/bg_ripple"/>
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/tvError"
+    <!-- Loading Overlay -->
+    <FrameLayout
+        android:id="@+id/loadingOverlay"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="#FF0000"
-        android:gravity="center"
-        android:padding="8dp"/>
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true">
 
-</LinearLayout>
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lottieLoading"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/loading_animation"
+            app:lottie_speed="4.0" />
+    </FrameLayout>
+</RelativeLayout>
