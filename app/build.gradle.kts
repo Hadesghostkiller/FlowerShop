@@ -26,12 +26,12 @@ android {
             )
         }
     }
-    
-    java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
+
+    // ✅ FIX CHO JAVA PROJECT
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
-}
 
     packaging {
         resources {
@@ -50,24 +50,31 @@ configurations.all {
 dependencies {
 
     implementation("com.facebook.android:facebook-login:latest.release")
+
     ////////firebase
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
-    ///
+
+    /// Android core
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+
     implementation(libs.room.runtime)
     annotationProcessor(libs.room.compiler)
+
     implementation(libs.lifecycle.livedata)
     implementation(libs.lifecycle.common.java8)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
     implementation("com.airbnb.android:lottie:6.4.0")
 }
