@@ -73,6 +73,9 @@
             android:name=".activities.CartActivity"
             android:exported="false" />
 
+<activity
+            android:name=".activities.ChatbotActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

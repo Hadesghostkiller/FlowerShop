@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey;
 
 @Entity(tableName = "Flower")
 public class Flower {
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     public int flowerID;
     public String flowerName;
     public double price;
@@ -13,12 +13,16 @@ public class Flower {
     public String category;
     public int stock;
 
-    public Flower(String flowerName, double price, String imageResource, String category, int stock) {
-        this.flowerID = 0;
+    public Flower(int flowerID, String flowerName, double price, String imageResource, String category, int stock) {
+        this.flowerID = flowerID;
         this.flowerName = flowerName;
         this.price = price;
         this.imageResource = imageResource;
         this.category = category;
         this.stock = stock;
+    }
+
+    public static Flower createWithoutID(String flowerName, double price, String imageResource, String category, int stock) {
+        return new Flower(0, flowerName, price, imageResource, category, stock);
     }
 }

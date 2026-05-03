@@ -41,6 +41,9 @@ public class SplashActivity extends AppCompatActivity {
                     .start();
         }
 
+        // Sync data from Supabase
+        com.example.flowershop.sync.SupabaseSync.syncFlowers(this);
+
         // 2. Đợi 2 giây để người dùng thấy thương hiệu rồi mới chuyển màn hình
         new Handler().postDelayed(this::checkLoginStatus, 2000);
     }

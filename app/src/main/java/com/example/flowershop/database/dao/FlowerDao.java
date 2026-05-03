@@ -39,4 +39,10 @@ public interface FlowerDao {
 
     @Query("SELECT * FROM Flower WHERE flowerName LIKE '%' || :name || '%'")
     LiveData<List<Flower>> searchFlowers(String name);
+
+    @Query("DELETE FROM Flower")
+    void deleteAll();
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertFlowers(List<Flower> flowers);
 }
