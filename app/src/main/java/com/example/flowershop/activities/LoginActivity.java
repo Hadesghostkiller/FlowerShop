@@ -56,7 +56,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Làm cho nội dung hiển thị tràn viền (Edge-to-Edge)
+        // Hiển thị tràn viền (Edge-to-Edge)
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_login);
 
@@ -86,8 +86,6 @@ public class LoginActivity extends AppCompatActivity {
         etGmail = findViewById(R.id.etGmail);
         etPassword = findViewById(R.id.etPassword);
         tvError = findViewById(R.id.tvError);
-
-        // Bạn nhớ thêm TextView này vào XML nếu chưa có nhé
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
 
         findViewById(R.id.btnLogin).setOnClickListener(this::performLoginWithAnimation);
@@ -117,7 +115,6 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // --- HÀM MỞ HỘP THOẠI QUÊN MẬT KHẨU ---
     private void showForgotPasswordDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Quên mật khẩu");
@@ -126,11 +123,8 @@ public class LoginActivity extends AppCompatActivity {
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
         input.setHint("example@gmail.com");
-
-        // Lấy sẵn text từ ô Gmail nếu người dùng đã lỡ nhập
         input.setText(etGmail.getText().toString());
 
-        // Thiết lập giao diện cho Dialog
         LinearLayout container = new LinearLayout(this);
         container.setOrientation(LinearLayout.VERTICAL);
         int paddingPixel = (int) (20 * getResources().getDisplayMetrics().density);
@@ -151,7 +145,6 @@ public class LoginActivity extends AppCompatActivity {
         builder.show();
     }
 
-    // --- LOGIC GỬI EMAIL RESET MẬT KHẨU ---
     private void sendPasswordReset(String email) {
         showLoading(true);
         mAuth.sendPasswordResetEmail(email)
@@ -170,7 +163,6 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    // --- LOGIC ĐĂNG NHẬP X (TWITTER) ---
     private void signInWithX() {
         showLoading(true);
         OAuthProvider.Builder provider = OAuthProvider.newBuilder("twitter.com");
@@ -186,7 +178,6 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    // --- LOGIC ĐĂNG NHẬP FACEBOOK ---
     private void signInWithFacebook() {
         LoginManager.getInstance().logInWithReadPermissions(this, mCallbackManager, Arrays.asList("email", "public_profile"));
         LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
@@ -210,7 +201,6 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // --- LOGIC ĐĂNG NHẬP GOOGLE ---
     private void signInWithGoogle() {
         startActivityForResult(mGoogleSignInClient.getSignInIntent(), RC_SIGN_IN);
     }
@@ -235,11 +225,11 @@ public class LoginActivity extends AppCompatActivity {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
             showLoading(false);
+            // Giờ đây Google cũng chuyển hướng về MenuActivity
             if (task.isSuccessful()) navigateToMenu(mAuth.getCurrentUser());
         });
     }
 
-    // --- HÀM ĐIỀU HƯỚNG ---
     private void navigateToMenu(FirebaseUser user) {
         if (user != null) {
             Intent intent = new Intent(this, MenuActivity.class);

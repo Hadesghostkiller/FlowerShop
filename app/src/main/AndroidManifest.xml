@@ -13,8 +13,13 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.FlowerShop">
-
-        <!-- 1. SplashActivity: Màn hình khởi động và kiểm tra Login Session -->
+        <activity
+            android:name=".activities.SettingsActivity"
+            android:exported="false" />
+        <!-- Đã sửa lỗi dư thẻ ở dòng này -->
+        <activity
+            android:name=".activities.ProfileActivity"
+            android:exported="false" /> <!-- 1. SplashActivity: Màn hình khởi động và kiểm tra Login Session -->
         <activity
             android:name=".activities.SplashActivity"
             android:exported="true">
@@ -22,9 +27,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- 2. Cấu hình Facebook SDK -->
+        </activity> <!-- 2. Cấu hình Facebook SDK -->
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
@@ -42,13 +45,13 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
-        </activity>
-
-        <!-- 3. Các Activity chức năng -->
+        </activity> <!-- 3. Các Activity chức năng -->
         <activity
             android:name=".activities.LoginActivity"
             android:exported="false" /> <!-- Đã xóa intent-filter LAUNCHER ở đây -->
