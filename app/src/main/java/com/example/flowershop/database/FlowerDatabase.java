@@ -48,34 +48,11 @@ public abstract class FlowerDatabase extends RoomDatabase {
 
     public void populateInitialData() {
         AccountDao accountDao = accountDao();
-        FlowerDao flowerDao = flowerDao();
 
         List<Account> accounts = accountDao.getAllAccountsSync();
         if (accounts == null || accounts.isEmpty()) {
             accountDao.insert(new Account("admin", "admin123", "Quan Ly", "admin"));
             accountDao.insert(new Account("user1", "123456", "Khach Hang", "customer"));
-        }
-
-        List<Flower> flowers = flowerDao.getAllFlowersSync();
-        if (flowers == null || flowers.isEmpty()) {
-            flowerDao.insert(new Flower("Hoa Hong Do", 350000, "hoa_hong", "Hoa Bo", 20));
-            flowerDao.insert(new Flower("Hoa Lan Trang", 450000, "hoa_lan", "Hoa Bo", 15));
-            flowerDao.insert(new Flower("Hoa Cuc Vang", 280000, "hoa_cuc", "Hoa Bo", 25));
-
-            flowerDao.insert(new Flower("Hoa Sinh Nhat", 500000, "hoa_sinh_nhat", "Sinh Nhat", 30));
-            flowerDao.insert(new Flower("Bo Hoa Chuc Mung", 650000, "hoa_chucmung", "Sinh Nhat", 20));
-            flowerDao.insert(new Flower("Hoa Huong Duong", 420000, "hoa_huongduong", "Sinh Nhat", 18));
-
-            flowerDao.insert(new Flower("Khai Truong Phat", 1200000, "hoa_kt1", "Khai Truong", 10));
-            flowerDao.insert(new Flower("Chuc Mung Khai Truong", 1500000, "hoa_kt2", "Khai Truong", 8));
-            flowerDao.insert(new Flower("Hoa Chuc Moc", 980000, "hoa_chucmo", "Khai Truong", 12));
-
-            flowerDao.insert(new Flower("Vong Hoa Chia Buon", 800000, "hoa_cuoi1", "Chia Buon", 10));
-            flowerDao.insert(new Flower("Hoa Tang Trieu", 650000, "hoa_tangtrieu", "Chia Buon", 8));
-            flowerDao.insert(new Flower("Hoa Phong Su", 550000, "hoa_phongsu", "Chia Buon", 12));
-
-            flowerDao.insert(new Flower("Binh Hoa Cuoi", 2500000, "hoa_cuoi", "Hoa Cuoi", 5));
-            flowerDao.insert(new Flower("Bo Hoa Cuoi Dep", 1800000, "hoa_cuoi2", "Hoa Cuoi", 7));
         }
     }
 }
