@@ -22,10 +22,4 @@ public class SupabaseFlower {
     public String category;
 
     public SupabaseFlower() {}
-
-    public com.example.flowershop.database.entity.Flower toFlower() {
-        return new com.example.flowershop.database.entity.Flower(
-                id, flowerName, price, imageResource, category, stock
-        );
-    }
 }

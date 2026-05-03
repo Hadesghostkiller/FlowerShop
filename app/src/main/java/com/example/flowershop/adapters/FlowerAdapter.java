@@ -11,25 +11,25 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.flowershop.R;
-import com.example.flowershop.database.entity.Flower;
+import com.example.flowershop.model.SupabaseFlower;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerViewHolder> {
 
-    private List<Flower> flowers = new ArrayList<>();
+    private List<SupabaseFlower> flowers = new ArrayList<>();
     private OnAddToCartListener listener;
 
     public interface OnAddToCartListener {
-        void onAddToCart(Flower flower);
+        void onAddToCart(SupabaseFlower flower);
     }
 
     public FlowerAdapter(OnAddToCartListener listener) {
         this.listener = listener;
     }
 
-    public void setFlowers(List<Flower> flowers) {
+    public void setFlowersFromSupabase(List<SupabaseFlower> flowers) {
         this.flowers = flowers;
         notifyDataSetChanged();
     }
@@ -44,7 +44,7 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
 
     @Override
     public void onBindViewHolder(@NonNull FlowerViewHolder holder, int position) {
-        Flower flower = flowers.get(position);
+        SupabaseFlower flower = flowers.get(position);
         holder.bind(flower);
     }
 
@@ -67,7 +67,7 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
             btnAddToCart = itemView.findViewById(R.id.btnAddToCart);
         }
 
-        void bind(Flower flower) {
+        void bind(SupabaseFlower flower) {
             tvFlowerName.setText(flower.flowerName);
             tvCategory.setText(flower.category);
             tvPrice.setText(String.format("%.0f VND", flower.price));

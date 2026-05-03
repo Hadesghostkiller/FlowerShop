@@ -12,22 +12,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.flowershop.adapters.FlowerAdapter;
 import com.example.flowershop.R;
-import com.example.flowershop.database.FlowerDatabase;
-import com.example.flowershop.database.entity.Cart;
-import com.example.flowershop.database.entity.Flower;
+import com.example.flowershop.model.SupabaseFlower;
+import com.example.flowershop.sync.SupabaseSync;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SearchActivity extends AppCompatActivity {
 
-    private FlowerDatabase database;
     private String username;
     private RecyclerView recyclerView;
     private FlowerAdapter adapter;
     private EditText etSearch, etQuantity, etMessage;
     private TextView tvTitle, tvCartInfo;
-    private List<Flower> searchResults = new ArrayList<>();
+    private List<SupabaseFlower> allFlowers = new ArrayList<>();
+    private List<SupabaseFlower> searchResults = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,8 +35,6 @@ public class SearchActivity extends AppCompatActivity {
 
         username = getIntent().getStringExtra("username");
         if (username == null) username = "user1";
-
-        database = FlowerDatabase.getDatabase(getApplicationContext());
 
         initViews();
         setupRecyclerView();
@@ -73,85 +70,52 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void loadAllFlowers() {
-        new Thread(() -> {
-            List<Flower> flowers = database.flowerDao().getAllFlowersSync();
-            if (flowers == null || flowers.isEmpty()) {
-                database.populateInitialData();
-                flowers = database.flowerDao().getAllFlowersSync();
+        SupabaseSync.getFlowers(new SupabaseSync.FlowerCallback() {
+            @Override
+            public void onSuccess(List<SupabaseFlower> flowers) {
+                allFlowers = flowers;
+                searchResults = flowers;
+                runOnUiThread(() -> {
+                    tvTitle.setText("Tat ca san pham:");
+                    adapter.setFlowersFromSupabase(searchResults);
+                });
             }
-            searchResults = flowers;
-            
-            runOnUiThread(() -> {
-                tvTitle.setText("Tat ca san pham:");
-                adapter.setFlowers(searchResults);
-                updateCartInfo();
-            });
-        }).start();
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> {
+                    Toast.makeText(SearchActivity.this, "Loi: " + error, Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
     }
 
     private void search() {
         String keyword = etSearch.getText().toString().trim().toLowerCase();
         
         if (keyword.isEmpty()) {
-            loadAllFlowers();
+            searchResults = new ArrayList<>(allFlowers);
+            tvTitle.setText("Tat ca san pham:");
+            adapter.setFlowersFromSupabase(searchResults);
             return;
         }
 
-        new Thread(() -> {
-            List<Flower> allFlowers = database.flowerDao().getAllFlowersSync();
-            List<Flower> results = new ArrayList<>();
-            
-            for (Flower f : allFlowers) {
-                if (f.flowerName.toLowerCase().contains(keyword)) {
-                    results.add(f);
-                }
+        List<SupabaseFlower> results = new ArrayList<>();
+        
+        for (SupabaseFlower f : allFlowers) {
+            if (f.flowerName != null && f.flowerName.toLowerCase().contains(keyword)) {
+                results.add(f);
             }
-            
-            searchResults = results;
-            
-            runOnUiThread(() -> {
-                tvTitle.setText("Ket qua tim kiem: " + results.size() + " san pham");
-                adapter.setFlowers(results);
-            });
-        }).start();
+        }
+        
+        searchResults = results;
+        
+        tvTitle.setText("Ket qua tim kiem: " + results.size() + " san pham");
+        adapter.setFlowersFromSupabase(results);
     }
 
-    private void addToCart(Flower flower) {
-        int quantity;
-        try {
-            quantity = Integer.parseInt(etQuantity.getText().toString());
-            if (quantity <= 0) quantity = 1;
-        } catch (Exception e) {
-            quantity = 1;
-        }
-
-        final int qty = quantity;
-
-        new Thread(() -> {
-            // Check if item exists in cart
-            List<Cart> carts = database.cartDao().getCartByUsernameSync(username);
-            boolean found = false;
-            
-            if (carts != null) {
-                for (Cart c : carts) {
-                    if (c.flowerID == flower.flowerID) {
-                        database.cartDao().updateQuantity(c.cartID, c.quantity + qty);
-                        found = true;
-                        break;
-                    }
-                }
-            }
-            
-            if (!found) {
-                Cart cart = new Cart(username, flower.flowerID, qty);
-                database.cartDao().insert(cart);
-            }
-
-            runOnUiThread(() -> {
-                Toast.makeText(this, "Da them " + qty + " " + flower.flowerName + " vao gio hang!", Toast.LENGTH_SHORT).show();
-                updateCartInfo();
-            });
-        }).start();
+    private void addToCart(SupabaseFlower flower) {
+        Toast.makeText(this, "Da chon: " + flower.flowerName, Toast.LENGTH_SHORT).show();
     }
 
     private void addSelectedToCart() {
@@ -160,27 +124,11 @@ public class SearchActivity extends AppCompatActivity {
             return;
         }
 
-        // Add first item in list (or could be a selected item)
         addToCart(searchResults.get(0));
-    }
-
-    private void updateCartInfo() {
-        new Thread(() -> {
-            List<Cart> carts = database.cartDao().getCartByUsernameSync(username);
-            int count = 0;
-            if (carts != null) {
-                for (Cart c : carts) {
-                    count += c.quantity;
-                }
-            }
-            final int finalCount = count;
-            runOnUiThread(() -> tvCartInfo.setText("Gio hang: " + finalCount + " san pham"));
-        }).start();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        updateCartInfo();
     }
 }

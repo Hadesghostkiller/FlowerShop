@@ -14,12 +14,6 @@ import androidx.room.Ignore;
             parentColumns = {"username"},
             childColumns = {"username"},
             onDelete = ForeignKey.CASCADE
-        ),
-        @ForeignKey(
-            entity = Flower.class,
-            parentColumns = {"flowerID"},
-            childColumns = {"flowerID"},
-            onDelete = ForeignKey.CASCADE
         )
     },
     indices = {@Index("username"), @Index("flowerID")}

@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.flowershop.adapters.FlowerAdapter;
 import com.example.flowershop.R;
-import com.example.flowershop.database.FlowerDatabase;
-import com.example.flowershop.database.entity.Flower;
+import com.example.flowershop.model.SupabaseFlower;
+import com.example.flowershop.sync.SupabaseSync;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,14 +21,13 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements FlowerAdapter.OnAddToCartListener {
 
-    private FlowerDatabase database;
     private String username = "user1";
     private RecyclerView recyclerView;
     private FlowerAdapter adapter;
     private ProgressBar progressBar;
     private TextView tvCartCount;
 
-    private List<Flower> allFlowers = new ArrayList<>();
+    private List<SupabaseFlower> allFlowers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +36,6 @@ public class MainActivity extends AppCompatActivity implements FlowerAdapter.OnA
 
         username = getIntent().getStringExtra("username");
         if (username == null) username = "user1";
-
-        database = FlowerDatabase.getDatabase(getApplicationContext());
 
         initViews();
         setupRecyclerView();
@@ -75,108 +72,48 @@ public class MainActivity extends AppCompatActivity implements FlowerAdapter.OnA
     private void loadFlowers() {
         progressBar.setVisibility(View.VISIBLE);
 
-        new Thread(() -> {
-            try {
-                database.populateInitialData();
-
-                List<Flower> checkFlowers = database.flowerDao().getAllFlowersSync();
-
-                allFlowers = new ArrayList<>();
-                if (checkFlowers != null && !checkFlowers.isEmpty()) {
-                    allFlowers.addAll(checkFlowers);
-                }
-
-                final List<Flower> finalFlowers = allFlowers;
+        SupabaseSync.getFlowers(new SupabaseSync.FlowerCallback() {
+            @Override
+            public void onSuccess(List<SupabaseFlower> flowers) {
+                allFlowers = flowers;
                 runOnUiThread(() -> {
                     progressBar.setVisibility(View.GONE);
-                    adapter.setFlowers(finalFlowers);
+                    adapter.setFlowersFromSupabase(allFlowers);
                 });
-            } catch (Exception e) {
-                e.printStackTrace();
+            }
+
+            @Override
+            public void onError(String error) {
                 runOnUiThread(() -> {
                     progressBar.setVisibility(View.GONE);
                 });
             }
-        }).start();
+        });
     }
 
     private void filterFlowers(String category) {
-        progressBar.setVisibility(View.VISIBLE);
+        List<SupabaseFlower> filtered;
 
-        new Thread(() -> {
-            List<Flower> filtered;
-
-            if (category.isEmpty()) {
-                // Show all flowers
-                filtered = new ArrayList<>(allFlowers);
-            } else {
-                // Filter by category - query directly from database
-                filtered = database.flowerDao().getFlowersByCategorySync(category);
-
-                // If DAO method doesn't exist, filter from cached list
-                if (filtered == null || filtered.isEmpty()) {
-                    filtered = new ArrayList<>();
-                    for (Flower f : allFlowers) {
-                        if (f.category != null && f.category.equals(category)) {
-                            filtered.add(f);
-                        }
-                    }
+        if (category.isEmpty()) {
+            filtered = new ArrayList<>(allFlowers);
+        } else {
+            filtered = new ArrayList<>();
+            for (SupabaseFlower f : allFlowers) {
+                if (f.category != null && f.category.equals(category)) {
+                    filtered.add(f);
                 }
             }
+        }
 
-            final List<Flower> result = filtered;
-            runOnUiThread(() -> {
-                progressBar.setVisibility(View.GONE);
-                adapter.setFlowers(result);
-            });
-        }).start();
+        adapter.setFlowersFromSupabase(filtered);
     }
 
     @Override
-    public void onAddToCart(Flower flower) {
-        new Thread(() -> {
-            FlowerDatabase db = FlowerDatabase.getDatabase(getApplicationContext());
-            List<com.example.flowershop.database.entity.Cart> carts = db.cartDao().getCartByUsernameSync(username);
-
-            boolean found = false;
-            if (carts != null) {
-                for (com.example.flowershop.database.entity.Cart c : carts) {
-                    if (c.flowerID == flower.flowerID) {
-                        db.cartDao().updateQuantity(c.cartID, c.quantity + 1);
-                        found = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!found) {
-                com.example.flowershop.database.entity.Cart cart =
-                    new com.example.flowershop.database.entity.Cart(username, flower.flowerID, 1);
-                db.cartDao().insert(cart);
-            }
-
-            runOnUiThread(() -> updateCartCount());
-        }).start();
+    public void onAddToCart(SupabaseFlower flower) {
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        updateCartCount();
-    }
-
-    private void updateCartCount() {
-        new Thread(() -> {
-            FlowerDatabase db = FlowerDatabase.getDatabase(getApplicationContext());
-            List<com.example.flowershop.database.entity.Cart> carts = db.cartDao().getCartByUsernameSync(username);
-            int count = 0;
-            if (carts != null) {
-                for (com.example.flowershop.database.entity.Cart c : carts) {
-                    count += c.quantity;
-                }
-            }
-            final int finalCount = count;
-            runOnUiThread(() -> tvCartCount.setText(String.format(Locale.getDefault(), "Gio hang (%d)", finalCount)));
-        }).start();
     }
 }
