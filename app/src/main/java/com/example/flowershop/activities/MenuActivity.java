@@ -33,7 +33,7 @@ public class MenuActivity extends AppCompatActivity {
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        // 2. Nhận dữ liệu từ Intent
+        // 2. Nhận dữ liệu từ Intent (truyền từ LoginActivity sang)
         username = getIntent().getStringExtra("username");
         fullname = getIntent().getStringExtra("fullname");
 
@@ -48,10 +48,11 @@ public class MenuActivity extends AppCompatActivity {
             performLogout();
         });
 
-        // Các nút chức năng khác
+        // Ánh xạ các nút chức năng
         Button btnShop = findViewById(R.id.btnShop);
         Button btnSearch = findViewById(R.id.btnSearch);
         Button btnCart = findViewById(R.id.btnCart);
+        Button btnProfile = findViewById(R.id.btnProfile); // Nút mới
 
         btnShop.setOnClickListener(v -> {
             Intent intent = new Intent(MenuActivity.this, MainActivity.class);
@@ -70,6 +71,15 @@ public class MenuActivity extends AppCompatActivity {
             intent.putExtra("username", username);
             startActivity(intent);
         });
+
+        // Xử lý chuyển hướng sang trang Hồ sơ cá nhân (ProfileActivity)
+        btnProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(MenuActivity.this, ProfileActivity.class);
+            // Truyền dữ liệu sang trang Profile để hiển thị thông tin
+            intent.putExtra("username", username);
+            intent.putExtra("fullname", fullname);
+            startActivity(intent);
+        });
     }
 
     /**
@@ -79,9 +89,8 @@ public class MenuActivity extends AppCompatActivity {
         // 1. Đăng xuất khỏi Firebase
         FirebaseAuth.getInstance().signOut();
 
-        // 2. Đăng xuất khỏi Google (Xóa session để lần sau hiện bảng chọn tài khoản)
+        // 2. Đăng xuất khỏi Google
         mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
-            // Sau khi Google sign out xong thì làm tiếp Facebook
             // 3. Đăng xuất khỏi Facebook
             LoginManager.getInstance().logOut();
 
@@ -89,7 +98,7 @@ public class MenuActivity extends AppCompatActivity {
             Toast.makeText(MenuActivity.this, "Đã đăng xuất!", Toast.LENGTH_SHORT).show();
 
             Intent intent = new Intent(MenuActivity.this, LoginActivity.class);
-            // Xóa sạch stack các Activity cũ để không thể nhấn Back quay lại Menu
+            // Xóa sạch stack các Activity cũ
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();

@@ -19,13 +19,13 @@
             android:layout_height="40dp"
             android:src="@android:drawable/ic_menu_revert"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back" />
+            android:contentDescription="Quay lại" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="TRANG CHU"
+            android:text="TRANG CHỦ"
             android:textSize="20sp"
             android:textColor="#FFFFFF"
             android:textStyle="bold"
@@ -36,7 +36,7 @@
             android:id="@+id/tvLogout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dang xuat"
+            android:text="Đăng xuất"
             android:textSize="14sp"
             android:textColor="#FFFFFF"
             android:padding="4dp"/>
@@ -48,7 +48,7 @@
         android:id="@+id/tvWelcome"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Xin chao!"
+        android:text="Xin chào!"
         android:textSize="18sp"
         android:padding="16dp"/>
 
@@ -63,7 +63,7 @@
             android:id="@+id/btnShop"
             android:layout_width="match_parent"
             android:layout_height="70dp"
-            android:text="[1] Xem cac KE HOA"
+            android:text="[1] Xem các KỆ HOA"
             android:textSize="16sp"
             android:backgroundTint="#E91E63"
             android:layout_marginBottom="8dp"/>
@@ -72,7 +72,7 @@
             android:id="@+id/btnSearch"
             android:layout_width="match_parent"
             android:layout_height="70dp"
-            android:text="[2] Tim kiem san pham"
+            android:text="[2] Tìm kiếm sản phẩm"
             android:textSize="16sp"
             android:backgroundTint="#E91E63"
             android:layout_marginBottom="8dp"/>
@@ -81,7 +81,17 @@
             android:id="@+id/btnCart"
             android:layout_width="match_parent"
             android:layout_height="70dp"
-            android:text="[3] Gio hang &amp; Thanh toan"
+            android:text="[3] Giỏ hàng &amp; Thanh toán"
+            android:textSize="16sp"
+            android:backgroundTint="#E91E63"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Nút mới: Hồ sơ cá nhân -->
+        <Button
+            android:id="@+id/btnProfile"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:text="[4] Hồ sơ cá nhân"
             android:textSize="16sp"
             android:backgroundTint="#E91E63"
             android:layout_marginBottom="8dp"/>
@@ -91,7 +101,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Chon chuc nang:"
+        android:text="Chọn chức năng:"
         android:textSize="16sp"
         android:padding="16dp"
         android:textStyle="bold"/>
