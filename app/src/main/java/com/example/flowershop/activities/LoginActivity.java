@@ -2,18 +2,15 @@ package com.example.flowershop.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowCompat;
 
@@ -91,8 +88,12 @@ public class LoginActivity extends AppCompatActivity {
         findViewById(R.id.btnLogin).setOnClickListener(this::performLoginWithAnimation);
         findViewById(R.id.btnRegister).setOnClickListener(v -> startActivity(new Intent(this, SignupActivity.class)));
 
+        // THAY ĐỔI TẠI ĐÂY: Chuyển sang Activity Quên mật khẩu mới
         if (tvForgotPassword != null) {
-            tvForgotPassword.setOnClickListener(v -> showForgotPasswordDialog());
+            tvForgotPassword.setOnClickListener(v -> {
+                Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+                startActivity(intent);
+            });
         }
 
         setupSocialButtons();
@@ -115,53 +116,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void showForgotPasswordDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Quên mật khẩu");
-        builder.setMessage("Nhập Gmail của bạn để nhận liên kết đặt lại mật khẩu:");
-
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-        input.setHint("example@gmail.com");
-        input.setText(etGmail.getText().toString());
-
-        LinearLayout container = new LinearLayout(this);
-        container.setOrientation(LinearLayout.VERTICAL);
-        int paddingPixel = (int) (20 * getResources().getDisplayMetrics().density);
-        container.setPadding(paddingPixel, 20, paddingPixel, 0);
-        container.addView(input);
-        builder.setView(container);
-
-        builder.setPositiveButton("Gửi", (dialog, which) -> {
-            String email = input.getText().toString().trim();
-            if (!email.isEmpty()) {
-                sendPasswordReset(email);
-            } else {
-                Toast.makeText(this, "Vui lòng nhập địa chỉ Gmail!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
-        builder.show();
-    }
-
-    private void sendPasswordReset(String email) {
-        showLoading(true);
-        mAuth.sendPasswordResetEmail(email)
-                .addOnCompleteListener(task -> {
-                    showLoading(false);
-                    if (task.isSuccessful()) {
-                        Toast.makeText(LoginActivity.this,
-                                "Link đặt lại mật khẩu đã được gửi vào Gmail của bạn!", Toast.LENGTH_LONG).show();
-                        tvError.setVisibility(View.GONE);
-                    } else {
-                        String error = task.getException() != null ?
-                                task.getException().getMessage() : "Lỗi gửi email!";
-                        tvError.setText(error);
-                        tvError.setVisibility(View.VISIBLE);
-                    }
-                });
-    }
+    // --- LOGIC SOCIAL LOGIN (GIỮ NGUYÊN) ---
 
     private void signInWithX() {
         showLoading(true);
@@ -225,7 +180,6 @@ public class LoginActivity extends AppCompatActivity {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
             showLoading(false);
-            // Giờ đây Google cũng chuyển hướng về MenuActivity
             if (task.isSuccessful()) navigateToMenu(mAuth.getCurrentUser());
         });
     }
@@ -243,6 +197,8 @@ public class LoginActivity extends AppCompatActivity {
     private void showLoading(boolean isShow) {
         if (loadingOverlay != null) loadingOverlay.setVisibility(isShow ? View.VISIBLE : View.GONE);
     }
+
+    // --- ANIMATIONS & LOGIN LOGIC (GIỮ NGUYÊN) ---
 
     private void setupStartupAnimations() {
         View lottie = findViewById(R.id.lottieTop);

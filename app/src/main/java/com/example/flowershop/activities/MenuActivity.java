@@ -55,6 +55,10 @@ public class MenuActivity extends AppCompatActivity {
         // Nút Thông báo
         findViewById(R.id.btnNotification).setOnClickListener(v ->
                 Toast.makeText(this, "Bạn không có thông báo mới", Toast.LENGTH_SHORT).show());
+
+        // Nút AI Chatbot
+        findViewById(R.id.btnChatbot).setOnClickListener(v ->
+                startActivity(new Intent(this, ChatbotActivity.class)));
     }
 
     private void setupBottomNavigation() {
