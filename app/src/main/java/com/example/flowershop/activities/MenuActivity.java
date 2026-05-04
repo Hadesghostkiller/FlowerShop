@@ -2,106 +2,118 @@ package com.example.flowershop.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
+import android.widget.AutoCompleteTextView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.flowershop.R;
-import com.facebook.login.LoginManager;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.example.flowershop.adapters.FlowerAdapter;
+import com.example.flowershop.model.SupabaseFlower;
+import com.example.flowershop.sync.SupabaseSync;
 import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.List;
 
 public class MenuActivity extends AppCompatActivity {
 
-    private String username;
-    private String fullname;
-    private GoogleSignInClient mGoogleSignInClient;
+    private ViewPager2 viewPagerBanner;
+    private RecyclerView rvCategory, rvOccasions, rvBestSeller;
+    private AutoCompleteTextView searchBar;
+    private FlowerAdapter bestSellerAdapter;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
-        // 1. Cấu hình Google Sign-In để có thể đăng xuất
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        mAuth = FirebaseAuth.getInstance();
 
-        // 2. Nhận dữ liệu từ Intent (truyền từ LoginActivity sang)
-        username = getIntent().getStringExtra("username");
-        fullname = getIntent().getStringExtra("fullname");
+        initViews();
+        setupBottomNavigation();
+        setupBanner();
+        loadBestSellers();
+    }
 
-        TextView tvWelcome = findViewById(R.id.tvWelcome);
-        tvWelcome.setText("Xin chào, " + (fullname != null ? fullname : "bạn") + "!");
+    private void initViews() {
+        viewPagerBanner = findViewById(R.id.viewPagerBanner);
+        rvCategory = findViewById(R.id.rvCategory);
+        rvOccasions = findViewById(R.id.rvOccasions);
+        rvBestSeller = findViewById(R.id.rvBestSeller);
+        searchBar = findViewById(R.id.autoCompleteSearch);
 
-        // --- Xử lý sự kiện Click ---
+        // Nút Menu/Drawer (Tạm thời hiện Toast)
+        findViewById(R.id.btnMenuToggle).setOnClickListener(v ->
+                Toast.makeText(this, "Tính năng Menu đang phát triển", Toast.LENGTH_SHORT).show());
 
-        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        // Nút Thông báo
+        findViewById(R.id.btnNotification).setOnClickListener(v ->
+                Toast.makeText(this, "Bạn không có thông báo mới", Toast.LENGTH_SHORT).show());
+    }
 
-        findViewById(R.id.tvLogout).setOnClickListener(v -> {
-            performLogout();
+    private void setupBottomNavigation() {
+        // Ánh xạ các Container (Vùng nhấn) của thanh điều hướng dưới
+        LinearLayout navHome = findViewById(R.id.navHomeContainer);
+        LinearLayout navCart = findViewById(R.id.navCartContainer);
+        LinearLayout navProfile = findViewById(R.id.navProfileContainer);
+        LinearLayout navWishlist = findViewById(R.id.navWishlistContainer);
+
+        navHome.setOnClickListener(v -> {
+            // Đang ở Home nên không cần chuyển trang
         });
 
-        // Ánh xạ các nút chức năng
-        Button btnShop = findViewById(R.id.btnShop);
-        Button btnSearch = findViewById(R.id.btnSearch);
-        Button btnCart = findViewById(R.id.btnCart);
-        Button btnProfile = findViewById(R.id.btnProfile); // Nút mới
-
-        btnShop.setOnClickListener(v -> {
-            Intent intent = new Intent(MenuActivity.this, MainActivity.class);
-            intent.putExtra("username", username);
-            startActivity(intent);
+        navCart.setOnClickListener(v -> {
+            startActivity(new Intent(this, CartActivity.class));
         });
 
-        btnSearch.setOnClickListener(v -> {
-            Intent intent = new Intent(MenuActivity.this, SearchActivity.class);
-            intent.putExtra("username", username);
-            startActivity(intent);
+        navProfile.setOnClickListener(v -> {
+            startActivity(new Intent(this, ProfileActivity.class));
         });
 
-        btnCart.setOnClickListener(v -> {
-            Intent intent = new Intent(MenuActivity.this, CartActivity.class);
-            intent.putExtra("username", username);
-            startActivity(intent);
+        navWishlist.setOnClickListener(v -> {
+            Toast.makeText(this, "Mục yêu thích sẽ sớm ra mắt!", Toast.LENGTH_SHORT).show();
         });
 
-        // Xử lý chuyển hướng sang trang Hồ sơ cá nhân (ProfileActivity)
-        btnProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(MenuActivity.this, ProfileActivity.class);
-            // Truyền dữ liệu sang trang Profile để hiển thị thông tin
-            intent.putExtra("username", username);
-            intent.putExtra("fullname", fullname);
-            startActivity(intent);
+        // Logout logic (Ví dụ: Nhấn giữ icon Profile để đăng xuất)
+        navProfile.setOnLongClickListener(v -> {
+            mAuth.signOut();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return true;
         });
     }
 
-    /**
-     * Logic đăng xuất tổng hợp: Firebase, Google và Facebook
-     */
-    private void performLogout() {
-        // 1. Đăng xuất khỏi Firebase
-        FirebaseAuth.getInstance().signOut();
+    private void setupBanner() {
+        // Ở đây bạn sẽ gắn Adapter cho ViewPager2 để chạy banner ảnh
+        // Hiện tại để trống để tránh lỗi compile nếu bạn chưa có BannerAdapter
+    }
 
-        // 2. Đăng xuất khỏi Google
-        mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
-            // 3. Đăng xuất khỏi Facebook
-            LoginManager.getInstance().logOut();
+    private void loadBestSellers() {
+        bestSellerAdapter = new FlowerAdapter(flower -> {
+            // Logic khi nhấn mua hoa ở mục Best Seller
+            Toast.makeText(this, "Đã chọn: " + flower.flowerName, Toast.LENGTH_SHORT).show();
+        });
 
-            // Thông báo và quay về màn hình Login
-            Toast.makeText(MenuActivity.this, "Đã đăng xuất!", Toast.LENGTH_SHORT).show();
+        rvBestSeller.setLayoutManager(new GridLayoutManager(this, 2));
+        rvBestSeller.setAdapter(bestSellerAdapter);
 
-            Intent intent = new Intent(MenuActivity.this, LoginActivity.class);
-            // Xóa sạch stack các Activity cũ
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
+        // Gọi dữ liệu từ Supabase
+        SupabaseSync.getFlowers(new SupabaseSync.FlowerCallback() {
+            @Override
+            public void onSuccess(List<SupabaseFlower> flowers) {
+                runOnUiThread(() -> bestSellerAdapter.setFlowersFromSupabase(flowers));
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(MenuActivity.this, "Lỗi tải dữ liệu", Toast.LENGTH_SHORT).show());
+            }
         });
     }
 }
