@@ -19,9 +19,6 @@
             android:name=".activities.ForgotPasswordActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.ForgotPasswordActivity"
-            android:exported="false" />
-        <activity
             android:name=".activities.SettingsActivity"
             android:exported="false" /> <!-- Đã sửa lỗi dư thẻ ở dòng này -->
         <activity
@@ -80,12 +77,6 @@
         <activity
             android:name=".activities.ChatbotActivity"
             android:exported="false" />
-        <activity
-            android:name=".activities.ForgotPasswordActivity"
-            android:exported="false"/>
-        <activity
-            android:name=".activities.EditProfileActivity"
-            android:exported="false"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"
