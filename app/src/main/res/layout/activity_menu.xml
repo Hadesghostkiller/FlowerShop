@@ -65,6 +65,17 @@
                 android:src="@drawable/ic_notification"
                 android:contentDescription="Notifications"
                 app:tint="#E91E63"
+                app:layout_constraintEnd_toStartOf="@+id/btnChatbot"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/ivLogo" />
+
+            <ImageView
+                android:id="@+id/btnChatbot"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_chatbot"
+                android:contentDescription="AI Chatbot"
+                app:tint="#E91E63"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="@+id/ivLogo" />
