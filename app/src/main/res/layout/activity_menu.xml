@@ -326,12 +326,13 @@
                 android:layout_height="match_parent"
                 android:layout_weight="0.75"
                 android:gravity="center">
+
                 <ImageView
                     android:id="@+id/navCartIcon"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:src="@drawable/ic_cart"
                     android:contentDescription="Cart"
+                    android:src="@drawable/ic_cart"
                     app:tint="#FFFFFF" />
             </LinearLayout>
 

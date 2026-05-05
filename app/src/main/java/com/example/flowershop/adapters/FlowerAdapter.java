@@ -23,6 +23,7 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
 
     private List<SupabaseFlower> flowers = new ArrayList<>();
     private OnAddToCartListener listener;
+    private int layoutResId = R.layout.item_flower;
 
     public interface OnAddToCartListener {
         void onAddToCart(SupabaseFlower flower);
@@ -30,6 +31,11 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
 
     public FlowerAdapter(OnAddToCartListener listener) {
         this.listener = listener;
+    }
+
+    public FlowerAdapter(OnAddToCartListener listener, int layoutResId) {
+        this.listener = listener;
+        this.layoutResId = layoutResId;
     }
 
     public void setFlowersFromSupabase(List<SupabaseFlower> flowers) {
@@ -41,7 +47,7 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
     @Override
     public FlowerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_flower, parent, false);
+                .inflate(layoutResId, parent, false);
         return new FlowerViewHolder(view);
     }
 
@@ -76,28 +82,32 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
             tvCategory.setText(flower.category);
             tvPrice.setText(String.format("%.0f VND", flower.price));
 
-            try {
-                String path = "flower_image/" + flower.imageResource + ".png";
-                InputStream is = context.getAssets().open(path);
-                Drawable d = Drawable.createFromStream(is, null);
-                ivFlower.setImageDrawable(d);
-                is.close();
-            } catch (Exception e) {
+            if (ivFlower != null) {
                 try {
-                    InputStream isDefault = context.getAssets().open("flower_image/default.png");
-                    Drawable dDefault = Drawable.createFromStream(isDefault, null);
-                    ivFlower.setImageDrawable(dDefault);
-                    isDefault.close();
-                } catch (Exception ex) {
-                    ivFlower.setImageResource(android.R.drawable.ic_menu_report_image);
+                    String path = "flower_image/" + flower.imageResource + ".png";
+                    InputStream is = context.getAssets().open(path);
+                    Drawable d = Drawable.createFromStream(is, null);
+                    ivFlower.setImageDrawable(d);
+                    is.close();
+                } catch (Exception e) {
+                    try {
+                        InputStream isDefault = context.getAssets().open("flower_image/default.png");
+                        Drawable dDefault = Drawable.createFromStream(isDefault, null);
+                        ivFlower.setImageDrawable(dDefault);
+                        isDefault.close();
+                    } catch (Exception ex) {
+                        ivFlower.setImageResource(android.R.drawable.ic_menu_report_image);
+                    }
                 }
             }
 
-            btnAddToCart.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onAddToCart(flower);
-                }
-            });
+            if (btnAddToCart != null) {
+                btnAddToCart.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onAddToCart(flower);
+                    }
+                });
+            }
         }
     }
 }

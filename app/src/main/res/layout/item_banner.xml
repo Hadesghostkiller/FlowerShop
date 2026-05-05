@@ -18,17 +18,22 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#40000000" />
+        android:background="#20000000" />
 
     <TextView
         android:id="@+id/tvBannerDescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#FFFFFF"
-        android:textSize="32sp"
+        android:textSize="42sp"
         android:fontFamily="@font/italianno_regular"
-        android:shadowColor="#80000000"
-        android:shadowRadius="4"
+        android:shadowColor="#CC000000"
+        android:shadowDx="3"
+        android:shadowDy="3"
+        android:shadowRadius="6"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingHorizontal="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

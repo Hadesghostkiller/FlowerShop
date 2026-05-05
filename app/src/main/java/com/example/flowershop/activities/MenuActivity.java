@@ -32,6 +32,7 @@ public class MenuActivity extends AppCompatActivity {
     private RecyclerView rvBestSeller;
     private FlowerAdapter bestSellerAdapter;
     private FirebaseAuth mAuth;
+    private AutoCompleteTextView autoCompleteSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +49,10 @@ public class MenuActivity extends AppCompatActivity {
         viewPagerBanner = findViewById(R.id.viewPagerBanner);
         tabDots = findViewById(R.id.tabDots);
         rvBestSeller = findViewById(R.id.rvBestSeller);
+        autoCompleteSearch = findViewById(R.id.autoCompleteSearch);
+
+        autoCompleteSearch.setFocusable(false);
+        autoCompleteSearch.setOnClickListener(v -> startActivity(new Intent(this, SearchActivity.class)));
 
         findViewById(R.id.btnMenuToggle).setOnClickListener(v -> Toast.makeText(this, "Menu...", Toast.LENGTH_SHORT).show());
         findViewById(R.id.btnNotification).setOnClickListener(v -> Toast.makeText(this, "No notifications", Toast.LENGTH_SHORT).show());
@@ -86,14 +91,18 @@ public class MenuActivity extends AppCompatActivity {
         bestSellerAdapter = new FlowerAdapter(f -> Toast.makeText(this, f.flowerName, Toast.LENGTH_SHORT).show());
         rvBestSeller.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rvBestSeller.setAdapter(bestSellerAdapter);
-        SupabaseSync.getFlowers(new SupabaseSync.FlowerCallback() {
+
+        SupabaseClient.getApi().getBestSellers().enqueue(new retrofit2.Callback<List<SupabaseFlower>>() {
             @Override
-            public void onSuccess(List<SupabaseFlower> flowers) {
-                runOnUiThread(() -> bestSellerAdapter.setFlowersFromSupabase(flowers));
+            public void onResponse(retrofit2.Call<List<SupabaseFlower>> call, retrofit2.Response<List<SupabaseFlower>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    runOnUiThread(() -> bestSellerAdapter.setFlowersFromSupabase(response.body()));
+                }
             }
+
             @Override
-            public void onError(String e) {
-                runOnUiThread(() -> Toast.makeText(MenuActivity.this, e, Toast.LENGTH_SHORT).show());
+            public void onFailure(retrofit2.Call<List<SupabaseFlower>> call, Throwable t) {
+                runOnUiThread(() -> Toast.makeText(MenuActivity.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show());
             }
         });
     }
