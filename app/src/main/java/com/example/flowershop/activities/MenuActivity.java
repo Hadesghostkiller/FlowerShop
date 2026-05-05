@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -104,7 +105,7 @@ public class MenuActivity extends AppCompatActivity {
             Toast.makeText(this, "Đã chọn: " + flower.flowerName, Toast.LENGTH_SHORT).show();
         });
 
-        rvBestSeller.setLayoutManager(new GridLayoutManager(this, 2));
+        rvBestSeller.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rvBestSeller.setAdapter(bestSellerAdapter);
 
         // Gọi dữ liệu từ Supabase
