@@ -30,9 +30,10 @@ public class ChatbotActivity extends AppCompatActivity {
     private EditText etMessage;
     private Button btnSend;
     private ImageButton btnBack;
+    private ImageButton btnEnd;
     private TextView tvTitle;
     private ChatMessageAdapter adapter;
-    private List<ChatMessage> messages = new ArrayList<>();
+    private static List<ChatMessage> messages = new ArrayList<>();
     private GroqApiService groqApiService;
     private String flowerContext = "";
     private boolean isLoadingContext = true;
@@ -46,14 +47,43 @@ public class ChatbotActivity extends AppCompatActivity {
 
         initViews();
         setupRecyclerView();
-        loadFlowerContext();
+        
+        // Chỉ hiện tin nhắn chào nếu là lần đầu (messages rỗng)
+        if (messages.isEmpty()) {
+            loadFlowerContext();
+            addBotMessage("Xin chào! Tôi là trợ lý ảo của FlowerShop. Tôi có thể giúp bạn:\n" +
+                    "• Tư vấn chọn hoa theo dịp\n" +
+                    "• Giới thiệu các loại hoa\n" +
+                    "• Trả lời câu hỏi về shop\n" +
+                    "• Viết thiệp chúc mừng\n\n" +
+                    "Bạn cần hỗ trợ gì?");
+        } else {
+            // Đã có tin nhắn cũ, chỉ load context
+            loadFlowerContextSilent();
+        }
+    }
+    
+    private void loadFlowerContextSilent() {
+        SupabaseClient.getApi().getFlowers().enqueue(new Callback<List<SupabaseFlower>>() {
+            @Override
+            public void onResponse(Call<List<SupabaseFlower>> call, Response<List<SupabaseFlower>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    StringBuilder sb = new StringBuilder();
+                    for (SupabaseFlower flower : response.body()) {
+                        sb.append("- ").append(flower.flowerName)
+                                .append(", Giá: ").append((int) flower.price).append("đ\n");
+                    }
+                    flowerContext = sb.toString();
+                }
+                isLoadingContext = false;
+            }
 
-        addBotMessage("Xin chào! Tôi là trợ lý ảo của FlowerShop. Tôi có thể giúp bạn:\n" +
-                "• Tư vấn chọn hoa theo dịp\n" +
-                "• Giới thiệu các loại hoa\n" +
-                "• Trả lời câu hỏi về shop\n" +
-                "• Viết thiệp chúc mừng\n\n" +
-                "Bạn cần hỗ trợ gì?");
+            @Override
+            public void onFailure(Call<List<SupabaseFlower>> call, Throwable t) {
+                flowerContext = "Hiện tại chưa có dữ liệu hoa.";
+                isLoadingContext = false;
+            }
+        });
     }
 
     private void loadFlowerContext() {
@@ -86,10 +116,19 @@ public class ChatbotActivity extends AppCompatActivity {
         etMessage = findViewById(R.id.etMessage);
         btnSend = findViewById(R.id.btnSend);
         btnBack = findViewById(R.id.btnBack);
+        btnEnd = findViewById(R.id.btnEnd);
         tvTitle = findViewById(R.id.tvTitle);
 
-        tvTitle.setText("AI Chatbot");
+        tvTitle.setText("FlowerBot");
+        
+        // Nút quay lại - chỉ thoát, không xóa tin nhắn
         btnBack.setOnClickListener(v -> finish());
+        
+        // Nút kết thúc - xóa tin nhắn và thoát
+        btnEnd.setOnClickListener(v -> {
+            messages.clear();
+            finish();
+        });
 
         btnSend.setOnClickListener(v -> {
             String message = etMessage.getText().toString().trim();

@@ -72,8 +72,9 @@
 
             <ImageView
                 android:id="@+id/btnChatbot"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
                 android:src="@drawable/ic_chatbot"
                 android:contentDescription="AI Chatbot"
                 app:tint="#E91E63"

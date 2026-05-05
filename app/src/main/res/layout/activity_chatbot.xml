@@ -1,77 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/white">
+    android:background="@drawable/bg_chat_gradient">
 
+    <!-- Header with shadow -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@color/pink"
+        android:background="@drawable/bg_header_gradient"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="10dp">
+        android:paddingHorizontal="10dp"
+        android:elevation="8dp">
 
         <ImageButton
             android:id="@+id/btnBack"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@android:color/transparent"
+            android:background="@drawable/bg_icon_circle"
             android:src="@drawable/ic_back"
             android:contentDescription="Back"
-            android:scaleType="centerInside" />
+            android:scaleType="centerInside"
+            app:tint="@color/white" />
 
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="AI Chatbot"
+            android:text="🌸 FlowerBot"
             android:textColor="@color/white"
-            android:textSize="22sp"
+            android:textSize="20sp"
             android:textStyle="bold"
-            android:gravity="center" />
+            android:gravity="center"
+            android:fontFamily="sans-serif-medium" />
 
-        <View
+        <ImageButton
+            android:id="@+id/btnEnd"
             android:layout_width="40dp"
-            android:layout_height="40dp" />
+            android:layout_height="40dp"
+            android:background="@drawable/bg_icon_circle"
+            android:src="@drawable/ic_end_chat"
+            android:contentDescription="End Chat"
+            android:scaleType="centerInside"
+            app:tint="@color/white" />
     </LinearLayout>
 
+    <!-- Chat Messages with fade animation -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="10dp"
-        android:background="@color/white" />
+        android:padding="12dp"
+        android:clipToPadding="false"
+        android:background="@android:color/transparent" />
 
+    <!-- Input Area with modern style -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="10dp"
-        android:background="@color/white"
-        android:elevation="5dp">
+        android:padding="12dp"
+        android:background="@drawable/bg_input_container"
+        android:elevation="10dp">
 
         <EditText
             android:id="@+id/etMessage"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="50dp"
             android:layout_weight="1"
             android:hint="Nhập tin nhắn..."
-            android:background="@drawable/bg_edittext"
-            android:paddingHorizontal="15dp"
-            android:inputType="text"
-            android:maxLines="1" />
+            android:background="@drawable/bg_edittext_new"
+            android:paddingHorizontal="20dp"
+            android:inputType="textMultiLine"
+            android:maxLines="3"
+            android:textSize="15sp"
+            android:textColor="#333333"
+            android:textColorHint="#999999" />
 
         <Button
             android:id="@+id/btnSend"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginStart="10dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="12dp"
             android:text="Gửi"
-            android:backgroundTint="@color/pink" />
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:background="@drawable/bg_send_button"
+            android:paddingHorizontal="24dp" />
     </LinearLayout>
 
 </LinearLayout>
