@@ -25,7 +25,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Tim kiem san pham"
+            android:text="Tìm kiếm sản phẩm"
             android:textSize="20sp"
             android:textColor="#FFFFFF"
             android:textStyle="bold"
@@ -46,7 +46,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Nhap ten hoa can tim..."
+            android:hint="Nhập tên hoa cần tìm..."
             android:padding="12dp"
             android:background="@android:drawable/edit_text"/>
 
@@ -54,7 +54,7 @@
             android:id="@+id/btnSearch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tim"
+            android:text="Tìm"
             android:backgroundTint="#E91E63"
             android:layout_marginStart="8dp"/>
 
@@ -64,7 +64,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Ket qua tim kiem:"
+        android:text="Kết quả tìm kiếm:"
         android:textSize="16sp"
         android:textStyle="bold"
         android:padding="16dp"/>
@@ -73,56 +73,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:padding="8dp"/>
-
-    <!-- Add to Cart -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="#F5F5F5">
-
-        <EditText
-            android:id="@+id/etQuantity"
-            android:layout_width="60dp"
-            android:layout_height="wrap_content"
-            android:hint="SL"
-            android:inputType="number"
-            android:text="1"
-            android:gravity="center"
-            android:padding="8dp"
-            android:background="@android:drawable/edit_text"/>
-
-        <EditText
-            android:id="@+id/etMessage"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="Loi chuc (vd: Chuc mung sinh nhat!)"
-            android:layout_marginStart="8dp"
-            android:padding="8dp"
-            android:background="@android:drawable/edit_text"/>
-
-        <Button
-            android:id="@+id/btnAddToCart"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Mua"
-            android:backgroundTint="#E91E63"
-            android:layout_marginStart="8dp"/>
-
-    </LinearLayout>
-
-    <!-- Cart indicator -->
-    <TextView
-        android:id="@+id/tvCartInfo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:background="#FFE0E0"
-        android:text="Gio hang: 0 san pham"/>
 
 </LinearLayout>

@@ -1,134 +1,113 @@
 package com.example.flowershop.activities;
 
 import android.os.Bundle;
-import android.widget.Button;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.flowershop.adapters.FlowerAdapter;
 import com.example.flowershop.R;
+import com.example.flowershop.adapters.FlowerAdapter;
+import com.example.flowershop.api.SupabaseClient;
 import com.example.flowershop.model.SupabaseFlower;
-import com.example.flowershop.sync.SupabaseSync;
-
 import java.util.ArrayList;
 import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SearchActivity extends AppCompatActivity {
-
-    private String username;
+    private EditText etSearch;
     private RecyclerView recyclerView;
-    private FlowerAdapter adapter;
-    private EditText etSearch, etQuantity, etMessage;
-    private TextView tvTitle, tvCartInfo;
+    private TextView tvTitle;
+    private ImageButton btnBack;
     private List<SupabaseFlower> allFlowers = new ArrayList<>();
-    private List<SupabaseFlower> searchResults = new ArrayList<>();
+    private FlowerAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-
-        username = getIntent().getStringExtra("username");
-        if (username == null) username = "user1";
-
         initViews();
         setupRecyclerView();
-        setupListeners();
-        loadAllFlowers();
+        fetchData();
     }
 
     private void initViews() {
         etSearch = findViewById(R.id.etSearch);
-        etQuantity = findViewById(R.id.etQuantity);
-        etMessage = findViewById(R.id.etMessage);
-        tvTitle = findViewById(R.id.tvTitle);
-        tvCartInfo = findViewById(R.id.tvCartInfo);
         recyclerView = findViewById(R.id.recyclerView);
-
-        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        tvTitle = findViewById(R.id.tvTitle);
+        btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> finish());
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filter(s.toString());
+            }
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
     }
 
     private void setupRecyclerView() {
-        adapter = new FlowerAdapter(flower -> {
-            addToCart(flower);
-        });
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        // Sử dụng layout item_flower_search (dạng danh sách, không ảnh)
+        adapter = new FlowerAdapter(
+                flower -> Toast.makeText(this, "Đã thêm " + flower.flowerName, Toast.LENGTH_SHORT).show(),
+                R.layout.item_flower_search
+        );
+        // Thay đổi sang LinearLayoutManager để hiển thị dạng danh sách
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
     }
 
-    private void setupListeners() {
-        Button btnSearch = findViewById(R.id.btnSearch);
-        Button btnAddToCart = findViewById(R.id.btnAddToCart);
-
-        btnSearch.setOnClickListener(v -> search());
-        btnAddToCart.setOnClickListener(v -> addSelectedToCart());
-    }
-
-    private void loadAllFlowers() {
-        SupabaseSync.getFlowers(new SupabaseSync.FlowerCallback() {
+    private void fetchData() {
+        SupabaseClient.getApi().getFlowers().enqueue(new Callback<List<SupabaseFlower>>() {
             @Override
-            public void onSuccess(List<SupabaseFlower> flowers) {
-                allFlowers = flowers;
-                searchResults = flowers;
-                runOnUiThread(() -> {
-                    tvTitle.setText("Tat ca san pham:");
-                    adapter.setFlowersFromSupabase(searchResults);
-                });
+            public void onResponse(Call<List<SupabaseFlower>> call, Response<List<SupabaseFlower>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    allFlowers = response.body();
+                    showDefaultItems();
+                }
             }
-
             @Override
-            public void onError(String error) {
-                runOnUiThread(() -> {
-                    Toast.makeText(SearchActivity.this, "Loi: " + error, Toast.LENGTH_SHORT).show();
-                });
+            public void onFailure(Call<List<SupabaseFlower>> call, Throwable t) {
+                Toast.makeText(SearchActivity.this, "Lỗi tải dữ liệu", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void search() {
-        String keyword = etSearch.getText().toString().trim().toLowerCase();
-        
-        if (keyword.isEmpty()) {
-            searchResults = new ArrayList<>(allFlowers);
-            tvTitle.setText("Tat ca san pham:");
-            adapter.setFlowersFromSupabase(searchResults);
+    private void showDefaultItems() {
+        tvTitle.setText("Mặt hàng điển hình");
+        List<SupabaseFlower> defaultList = new ArrayList<>();
+        int limit = Math.min(10, allFlowers.size());
+        for (int i = 0; i < limit; i++) {
+            defaultList.add(allFlowers.get(i));
+        }
+        adapter.setFlowersFromSupabase(defaultList);
+    }
+
+    private void filter(String text) {
+        if (text.isEmpty()) {
+            showDefaultItems();
             return;
         }
-
-        List<SupabaseFlower> results = new ArrayList<>();
-        
-        for (SupabaseFlower f : allFlowers) {
-            if (f.flowerName != null && f.flowerName.toLowerCase().contains(keyword)) {
-                results.add(f);
+        List<SupabaseFlower> filteredList = new ArrayList<>();
+        for (SupabaseFlower item : allFlowers) {
+            if (item.flowerName.toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(item);
             }
         }
-        
-        searchResults = results;
-        
-        tvTitle.setText("Ket qua tim kiem: " + results.size() + " san pham");
-        adapter.setFlowersFromSupabase(results);
-    }
-
-    private void addToCart(SupabaseFlower flower) {
-        Toast.makeText(this, "Da chon: " + flower.flowerName, Toast.LENGTH_SHORT).show();
-    }
-
-    private void addSelectedToCart() {
-        if (searchResults.isEmpty()) {
-            Toast.makeText(this, "Khong co san pham!", Toast.LENGTH_SHORT).show();
-            return;
+        if (filteredList.isEmpty()) {
+            tvTitle.setText("Không tìm thấy mặt hàng phù hợp");
+        } else {
+            tvTitle.setText("Kết quả tìm kiếm cho: " + text);
         }
-
-        addToCart(searchResults.get(0));
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
+        adapter.setFlowersFromSupabase(filteredList);
     }
 }
