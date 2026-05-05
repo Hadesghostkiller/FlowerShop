@@ -83,9 +83,23 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp">
-                        <RadioButton android:id="@+id/rbExcellent" android:text="Rất tuyệt vời" />
-                        <RadioButton android:id="@+id/rbGood" android:text="Tạm ổn" />
-                        <RadioButton android:id="@+id/rbBad" android:text="Cần cải thiện" />
+                        <RadioButton
+                            android:id="@+id/rbExcellent"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tuyệt vời" />
+
+                        <RadioButton
+                            android:id="@+id/rbGood"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tạm ổn" />
+
+                        <RadioButton
+                            android:id="@+id/rbBad"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Cần cải thiện" />
                     </RadioGroup>
 
                     <TextView
