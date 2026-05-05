@@ -37,7 +37,7 @@ public class ProfileActivity extends AppCompatActivity {
     private ImageView imgAvatar, btnBack, btnEditProfile;
     private CardView btnEditAvatar;
     private TextView tvFullName, tvEmail, tvPhone, tvDob;
-    private View menuLogout, menuSettings;
+    private View menuLogout, menuSettings, menuRating; // Thêm menuRating
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -67,7 +67,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 100 && resultCode == RESULT_OK) {
-            loadUser(); // Làm mới dữ liệu khi quay lại từ EditProfileActivity
+            loadUser();
         }
     }
 
@@ -102,6 +102,7 @@ public class ProfileActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         menuLogout = findViewById(R.id.menuLogout);
         menuSettings = findViewById(R.id.menuSettings);
+        menuRating = findViewById(R.id.menuRating); // Ánh xạ menuRating
     }
 
     private void loadUser() {
@@ -131,17 +132,13 @@ public class ProfileActivity extends AppCompatActivity {
                         String dob = doc.getString("dob");
                         String name = doc.getString("name");
 
-                        // Hiển thị SĐT
                         tvPhone.setText((phone == null || phone.trim().isEmpty()) ? "Cập nhật" : phone);
-
-                        // QUAN TRỌNG: Đã đổi "chưa cập nhật" thành "dd/mm/yyyy"
                         tvDob.setText("Ngày sinh: " +
                                 ((dob == null || dob.trim().isEmpty()) ? "dd/mm/yyyy" : dob));
 
                         if (name != null && !name.trim().isEmpty())
                             tvFullName.setText(name);
                     } else {
-                        // Nếu chưa có document, hiển thị mặc định
                         tvPhone.setText("Cập nhật");
                         tvDob.setText("Ngày sinh: dd/mm/yyyy");
                     }
@@ -160,6 +157,14 @@ public class ProfileActivity extends AppCompatActivity {
             intent.putExtra("dob", tvDob.getText().toString());
             startActivityForResult(intent, 100);
         });
+
+        // Xử lý mở màn hình Đánh giá
+        if (menuRating != null) {
+            menuRating.setOnClickListener(v -> {
+                Intent intent = new Intent(ProfileActivity.this, RatingActivity.class);
+                startActivity(intent);
+            });
+        }
 
         menuLogout.setOnClickListener(v -> {
             mAuth.signOut();
@@ -218,29 +223,5 @@ public class ProfileActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e("LOCAL_STORAGE", "Lỗi: " + e.getMessage());
         }
-    }
-
-    // Hàm saveInfo bổ sung để đồng bộ logic văn bản mặc định
-    private void saveInfo(String name, String phone, String dob) {
-        Map<String, Object> map = new HashMap<>();
-        if (!name.isEmpty()) map.put("name", name);
-        if (!phone.isEmpty()) map.put("phone", phone);
-        if (!dob.isEmpty()) map.put("dob", dob);
-
-        db.collection("artifacts").document(appId)
-                .collection("users").document(userId)
-                .collection("profile").document("data")
-                .set(map, SetOptions.merge())
-                .addOnSuccessListener(a -> {
-                    tvFullName.setText(name.isEmpty() ? tvFullName.getText() : name);
-                    tvPhone.setText(phone.isEmpty() ? "Cập nhật" : phone);
-                    // Đổi "Cập nhật" hoặc "chưa cập nhật" thành "dd/mm/yyyy" ở đây
-                    tvDob.setText("Ngày sinh: " + (dob.isEmpty() ? "dd/mm/yyyy" : dob));
-                    Toast.makeText(this, "Đã lưu thông tin!", Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("FIRESTORE_SAVE_ERROR", e.getMessage());
-                    Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
     }
 }

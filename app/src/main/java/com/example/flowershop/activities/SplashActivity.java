@@ -46,24 +46,24 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void checkLoginStatus() {
-        // Đây chính là dòng lệnh "đọc" trạng thái đăng nhập đã lưu
+
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         Intent intent;
         if (currentUser != null) {
-            // Đã đăng nhập trước đó -> Vào thẳng Menu
+
             intent = new Intent(SplashActivity.this, MenuActivity.class);
-            // Bạn có thể truyền thông tin người dùng sang Menu nếu muốn
+
             intent.putExtra("username", currentUser.getEmail());
             intent.putExtra("fullname", currentUser.getDisplayName());
         } else {
-            // Chưa đăng nhập hoặc đã logout -> Sang màn hình Login
+
             intent = new Intent(SplashActivity.this, LoginActivity.class);
         }
 
         startActivity(intent);
 
-        // Quan trọng: Đóng Splash để người dùng nhấn Back không bị quay lại đây
+
         finish();
     }
 }

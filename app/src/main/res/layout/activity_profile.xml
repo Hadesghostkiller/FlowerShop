@@ -27,7 +27,7 @@
                 android:layout_centerVertical="true"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@android:drawable/ic_menu_revert"
-                app:tint="#1E293B" />
+                app:tint="#000000" />
 
             <ImageView
                 android:id="@+id/btnEditProfile"
@@ -37,7 +37,7 @@
                 android:layout_centerVertical="true"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_edit"
-                app:tint="#1E293B" />
+                app:tint="#000000" />
         </RelativeLayout>
 
         <!-- 2. THÔNG TIN CÁ NHÂN -->
@@ -66,7 +66,7 @@
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
                         android:background="#E0E0E0"
-                        android:src="@drawable/user"/>
+                        android:src="@android:drawable/ic_menu_myplaces" />
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
@@ -85,7 +85,7 @@
                         android:background="#FFFFFF"
                         android:padding="5dp"
                         android:src="@android:drawable/ic_menu_camera"
-                        app:tint="#1E293B" />
+                        app:tint="#000000" />
                 </androidx.cardview.widget.CardView>
             </FrameLayout>
 
@@ -109,7 +109,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="Ngày sinh: chưa cập nhật"
+                    android:text="Ngày sinh: dd/mm/yyyy"
                     android:textColor="#475569"
                     android:textSize="13sp" />
             </LinearLayout>
@@ -132,13 +132,13 @@
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:src="@drawable/ic_phone"
-                    app:tint="#475569" />
+                    app:tint="#000000" />
                 <TextView
                     android:id="@+id/tvPhone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
-                    android:text="Chưa cập nhật SĐT"
+                    android:text="Cập nhật"
                     android:textColor="#475569"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -153,7 +153,7 @@
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:src="@drawable/ic_email"
-                    app:tint="#475569" />
+                    app:tint="#000000" />
                 <TextView
                     android:id="@+id/tvEmail"
                     android:layout_width="wrap_content"
@@ -257,7 +257,7 @@
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:src="@android:drawable/ic_menu_agenda"
-                    app:tint="#1E293B" />
+                    app:tint="#000000" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -282,7 +282,7 @@
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:src="@android:drawable/ic_menu_myplaces"
-                    app:tint="#1E293B" />
+                    app:tint="#000000" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -307,7 +307,7 @@
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:src="@android:drawable/ic_menu_view"
-                    app:tint="#1E293B" />
+                    app:tint="#000000" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -332,12 +332,37 @@
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:src="@android:drawable/ic_menu_share"
-                    app:tint="#1E293B" />
+                    app:tint="#000000" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
                     android:text="Giới thiệu bạn bè"
+                    android:textColor="#1E293B"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/menuRating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="24dp"
+                android:paddingVertical="16dp">
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@android:drawable/btn_star_big_on"
+                    app:tint="#000000" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:text="Đánh giá ứng dụng"
                     android:textColor="#1E293B"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -357,7 +382,7 @@
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:src="@android:drawable/ic_menu_preferences"
-                    app:tint="#1E293B" />
+                    app:tint="#000000" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -389,7 +414,7 @@
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:src="@android:drawable/ic_lock_power_off"
-                    app:tint="#E53935" />
+                    app:tint="#000000" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
