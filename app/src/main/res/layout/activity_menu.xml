@@ -37,8 +37,8 @@
 
             <ImageView
                 android:id="@+id/ivLogo"
-                android:layout_width="250dp"
-                android:layout_height="100dp"
+                android:layout_width="200dp"
+                android:layout_height="80dp"
                 android:src="@drawable/logo_flower"
                 android:contentDescription="Flower Shop Logo"
                 android:scaleType="fitCenter"
@@ -51,23 +51,24 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginEnd="16dp"
-                android:src="@drawable/ic_language"
                 android:contentDescription="Language"
-                app:tint="#E91E63"
+                android:src="@drawable/ic_language"
+                app:layout_constraintBottom_toBottomOf="@+id/ivLogo"
                 app:layout_constraintEnd_toStartOf="@+id/btnNotification"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="@+id/ivLogo" />
+                app:tint="#E91E63" />
 
             <ImageView
                 android:id="@+id/btnNotification"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_notification"
+                android:layout_marginEnd="20dp"
                 android:contentDescription="Notifications"
-                app:tint="#E91E63"
+                android:src="@drawable/ic_notification"
+                app:layout_constraintBottom_toBottomOf="@+id/ivLogo"
                 app:layout_constraintEnd_toStartOf="@+id/btnChatbot"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="@+id/ivLogo" />
+                app:tint="#E91E63" />
 
             <ImageView
                 android:id="@+id/btnChatbot"
@@ -153,20 +154,39 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
 
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tabDots"
+                    android:layout_width="wrap_content"
+                    android:layout_height="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@android:color/transparent"
+                    app:layout_constraintBottom_toBottomOf="@+id/viewPagerBanner"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:tabBackground="@drawable/selector_dot"
+                    app:tabGravity="center"
+                    app:tabIndicatorHeight="0dp"
+                    app:tabMaxWidth="12dp"
+                    app:tabMinWidth="12dp"
+                    app:tabPaddingEnd="0dp"
+                    app:tabPaddingStart="0dp"
+                    app:tabRippleColor="@null" />
+
                 <TextView
                     android:id="@+id/tvTodayTheme"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/today_theme"
-                    android:textColor="#FFFFFF"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
+                    android:fontFamily="@font/italianno_regular"
                     android:shadowColor="#80000000"
                     android:shadowRadius="4"
-                    app:layout_constraintTop_toTopOf="@+id/viewPagerBanner"
+                    android:textColor="#FFFFFF"
+                    android:textSize="42sp"
+                    android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="@+id/viewPagerBanner"
-                    app:layout_constraintStart_toStartOf="@+id/viewPagerBanner"
-                    app:layout_constraintEnd_toEndOf="@+id/viewPagerBanner" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/viewPagerBanner"
+                    tools:text="Chủ đề ngày hôm nay" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView

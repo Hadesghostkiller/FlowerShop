@@ -84,4 +84,5 @@ dependencies {
     implementation("com.airbnb.android:lottie:6.4.0")
     implementation("com.google.firebase:firebase-firestore:24.10.0")
     implementation("com.google.firebase:firebase-storage:20.3.0")
+    implementation("com.google.android.material:material:1.9.0")
 }

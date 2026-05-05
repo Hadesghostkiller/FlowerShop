@@ -1,5 +1,7 @@
 package com.example.flowershop.adapters;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.flowershop.R;
 import com.example.flowershop.model.SupabaseFlower;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,10 +71,28 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
         }
 
         void bind(SupabaseFlower flower) {
+            Context context = itemView.getContext();
             tvFlowerName.setText(flower.flowerName);
             tvCategory.setText(flower.category);
             tvPrice.setText(String.format("%.0f VND", flower.price));
-            
+
+            try {
+                String path = "flower_image/" + flower.imageResource + ".png";
+                InputStream is = context.getAssets().open(path);
+                Drawable d = Drawable.createFromStream(is, null);
+                ivFlower.setImageDrawable(d);
+                is.close();
+            } catch (Exception e) {
+                try {
+                    InputStream isDefault = context.getAssets().open("flower_image/default.png");
+                    Drawable dDefault = Drawable.createFromStream(isDefault, null);
+                    ivFlower.setImageDrawable(dDefault);
+                    isDefault.close();
+                } catch (Exception ex) {
+                    ivFlower.setImageResource(android.R.drawable.ic_menu_report_image);
+                }
+            }
+
             btnAddToCart.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onAddToCart(flower);
