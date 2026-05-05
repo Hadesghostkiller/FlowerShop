@@ -4,12 +4,14 @@ import android.content.Context;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import com.example.flowershop.database.dao.AccountDao;
 import com.example.flowershop.database.dao.CardTemplateDao;
 import com.example.flowershop.database.dao.CartDao;
 import com.example.flowershop.database.dao.ChatbotResponseDao;
 import com.example.flowershop.database.dao.FlowerDao;
 import com.example.flowershop.database.dao.OrderDao;
 import com.example.flowershop.database.dao.OrderDetailDao;
+import com.example.flowershop.database.entity.Account;
 import com.example.flowershop.database.entity.CardTemplate;
 import com.example.flowershop.database.entity.Cart;
 import com.example.flowershop.database.entity.ChatbotResponse;
@@ -20,7 +22,7 @@ import com.example.flowershop.database.entity.OrderDetail;
 import java.util.List;
 
 @Database(
-    entities = {Flower.class, Cart.class, Order.class, OrderDetail.class, CardTemplate.class, ChatbotResponse.class},
+    entities = {Flower.class, Cart.class, Order.class, OrderDetail.class, CardTemplate.class, ChatbotResponse.class, Account.class},
     version = 3,
     exportSchema = false
 )
@@ -31,6 +33,7 @@ public abstract class FlowerDatabase extends RoomDatabase {
     public abstract OrderDetailDao orderDetailDao();
     public abstract CardTemplateDao cardTemplateDao();
     public abstract ChatbotResponseDao chatbotResponseDao();
+    public abstract AccountDao accountDao();
 
     private static volatile FlowerDatabase INSTANCE;
 

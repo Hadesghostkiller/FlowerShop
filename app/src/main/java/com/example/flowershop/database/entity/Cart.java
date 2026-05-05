@@ -10,13 +10,13 @@ import androidx.room.Ignore;
     tableName = "Cart",
     foreignKeys = {
         @ForeignKey(
-            entity = Flower.class,
-            parentColumns = {"flowerID"},
-            childColumns = {"flowerID"},
+            entity = Account.class,
+            parentColumns = {"username"},
+            childColumns = {"username"},
             onDelete = ForeignKey.CASCADE
         )
     },
-    indices = {@Index("flowerID")}
+    indices = {@Index("username"), @Index("flowerID")}
 )
 public class Cart {
     @PrimaryKey(autoGenerate = true)

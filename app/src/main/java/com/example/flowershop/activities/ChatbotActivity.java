@@ -1,12 +1,10 @@
 package com.example.flowershop.activities;
 
-import android.app.AlertDialog;
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,230 +12,169 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.flowershop.R;
 import com.example.flowershop.adapters.ChatMessageAdapter;
-import com.example.flowershop.database.FlowerDatabase;
-import com.example.flowershop.database.entity.ChatbotResponse;
-import com.example.flowershop.database.entity.Flower;
 import com.example.flowershop.model.ChatMessage;
+import com.example.flowershop.utils.GroqApiService;
+import com.example.flowershop.api.SupabaseClient;
+import com.example.flowershop.model.SupabaseFlower;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class ChatbotActivity extends AppCompatActivity {
-    private RecyclerView rvChat;
+
+    private RecyclerView recyclerView;
     private EditText etMessage;
-    private ImageButton btnSend;
+    private Button btnSend;
+    private ImageButton btnBack;
+    private ImageButton btnEnd;
+    private TextView tvTitle;
     private ChatMessageAdapter adapter;
-    private List<ChatMessage> messages = new ArrayList<>();
-    private FlowerDatabase database;
+    private static List<ChatMessage> messages = new ArrayList<>();
+    private GroqApiService groqApiService;
+    private String flowerContext = "";
+    private boolean isLoadingContext = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatbot);
 
-        database = FlowerDatabase.getDatabase(getApplicationContext());
+        groqApiService = new GroqApiService();
+
         initViews();
         setupRecyclerView();
-        setupClickListeners();
+        
+        // Chỉ hiện tin nhắn chào nếu là lần đầu (messages rỗng)
+        if (messages.isEmpty()) {
+            loadFlowerContext();
+            addBotMessage("Xin chào! Tôi là trợ lý ảo của FlowerShop. Tôi có thể giúp bạn:\n" +
+                    "• Tư vấn chọn hoa theo dịp\n" +
+                    "• Giới thiệu các loại hoa\n" +
+                    "• Trả lời câu hỏi về shop\n" +
+                    "• Viết thiệp chúc mừng\n\n" +
+                    "Bạn cần hỗ trợ gì?");
+        } else {
+            // Đã có tin nhắn cũ, chỉ load context
+            loadFlowerContextSilent();
+        }
+    }
+    
+    private void loadFlowerContextSilent() {
+        SupabaseClient.getApi().getFlowers().enqueue(new Callback<List<SupabaseFlower>>() {
+            @Override
+            public void onResponse(Call<List<SupabaseFlower>> call, Response<List<SupabaseFlower>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    StringBuilder sb = new StringBuilder();
+                    for (SupabaseFlower flower : response.body()) {
+                        sb.append("- ").append(flower.flowerName)
+                                .append(", Giá: ").append((int) flower.price).append("đ\n");
+                    }
+                    flowerContext = sb.toString();
+                }
+                isLoadingContext = false;
+            }
 
-        // Welcome message
-        addBotMessage("Xin chào! Tôi là trợ lý ảo FlowerShop. Tôi có thể giúp bạn:\n1. Tư vấn chọn hoa theo dịp\n2. Viết thiệp tự động\n3. Tra cứu thông tin hoa\nBạn cần hỗ trợ gì?");
+            @Override
+            public void onFailure(Call<List<SupabaseFlower>> call, Throwable t) {
+                flowerContext = "Hiện tại chưa có dữ liệu hoa.";
+                isLoadingContext = false;
+            }
+        });
+    }
+
+    private void loadFlowerContext() {
+        SupabaseClient.getApi().getFlowers().enqueue(new Callback<List<SupabaseFlower>>() {
+            @Override
+            public void onResponse(Call<List<SupabaseFlower>> call, Response<List<SupabaseFlower>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    StringBuilder sb = new StringBuilder();
+                    for (SupabaseFlower flower : response.body()) {
+                        sb.append("- ").append(flower.flowerName)
+                                .append(", Giá: ").append((int) flower.price).append("đ\n");
+                    }
+                    flowerContext = sb.toString();
+                } else {
+                    flowerContext = "Hiện tại chưa có dữ liệu hoa. Vui lòng liên hệ shop để được tư vấn.";
+                }
+                isLoadingContext = false;
+            }
+
+            @Override
+            public void onFailure(Call<List<SupabaseFlower>> call, Throwable t) {
+                flowerContext = "Hiện tại chưa có dữ liệu hoa. Vui lòng liên hệ shop để được tư vấn.";
+                isLoadingContext = false;
+            }
+        });
     }
 
     private void initViews() {
-        rvChat = findViewById(R.id.rvChat);
+        recyclerView = findViewById(R.id.recyclerView);
         etMessage = findViewById(R.id.etMessage);
         btnSend = findViewById(R.id.btnSend);
+        btnBack = findViewById(R.id.btnBack);
+        btnEnd = findViewById(R.id.btnEnd);
+        tvTitle = findViewById(R.id.tvTitle);
 
-        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
-        findViewById(R.id.btnConsult).setOnClickListener(v -> showConsultDialog());
-        findViewById(R.id.btnCard).setOnClickListener(v -> showCardDialog());
-        findViewById(R.id.btnRecognize).setOnClickListener(v -> showRecognizeDialog());
+        tvTitle.setText("FlowerBot");
+        
+        // Nút quay lại - chỉ thoát, không xóa tin nhắn
+        btnBack.setOnClickListener(v -> finish());
+        
+        // Nút kết thúc - xóa tin nhắn và thoát
+        btnEnd.setOnClickListener(v -> {
+            messages.clear();
+            finish();
+        });
+
+        btnSend.setOnClickListener(v -> {
+            String message = etMessage.getText().toString().trim();
+            if (!message.isEmpty()) {
+                processMessage(message);
+                etMessage.setText("");
+            }
+        });
     }
 
     private void setupRecyclerView() {
         adapter = new ChatMessageAdapter(messages);
-        rvChat.setLayoutManager(new LinearLayoutManager(this));
-        rvChat.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
     }
 
-    private void setupClickListeners() {
-        btnSend.setOnClickListener(v -> sendMessage());
-        etMessage.setOnEditorActionListener((v, actionId, event) -> {
-            sendMessage();
-            return true;
+    private void processMessage(String userMessage) {
+        addUserMessage(userMessage);
+
+        if (isLoadingContext) {
+            addBotMessage("Đang tải dữ liệu... Vui lòng chờ một chút.");
+            return;
+        }
+
+        groqApiService.sendMessage(userMessage, flowerContext, new GroqApiService.Callback() {
+            @Override
+            public void onSuccess(String response) {
+                addBotMessage(response);
+            }
+
+            @Override
+            public void onError(String error) {
+                addBotMessage("Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau.");
+            }
         });
     }
 
-    private void sendMessage() {
-        String text = etMessage.getText().toString().trim();
-        if (text.isEmpty()) return;
-
-        addUserMessage(text);
-        etMessage.setText("");
-
-        // Process message
-        processUserMessage(text.toLowerCase());
-    }
-
-    private void processUserMessage(String message) {
-        // Check for flower keywords
-        if (message.contains("sinh nhật") || message.contains("sinh nhat") || message.contains("birthday")) {
-            respondWithFlowers("Sinh Nhat");
-        } else if (message.contains("khai trương") || message.contains("khai truong")) {
-            respondWithFlowers("Khai Truong");
-        } else if (message.contains("chia buồn") || message.contains("chia buon") || message.contains("tang")) {
-            respondWithFlowers("Chia Buon");
-        } else if (message.contains("cưới") || message.contains("cuoi") || message.contains("wedding")) {
-            respondWithFlowers("Hoa Cuoi");
-        } else if (message.contains("hoa") || message.contains("flower")) {
-            respondWithFlowers("Hoa Bo");
-        } else {
-            // Search in ChatbotResponse table
-            new Thread(() -> {
-                List<ChatbotResponse> responses = database.chatbotResponseDao().searchByKeyword(message);
-                runOnUiThread(() -> {
-                    if (!responses.isEmpty()) {
-                        addBotMessage(responses.get(0).response);
-                    } else {
-                        addBotMessage("Xin lỗi, tôi chưa hiểu ý bạn. Bạn có thể hỏi về:\n- Tư vấn hoa theo dịp (sinh nhật, khai trương...)\n- Viết thiệp tự động\n- Tra cứu giá hoa");
-                    }
-                });
-            }).start();
-        }
-    }
-
-    private void respondWithFlowers(String category) {
-        new Thread(() -> {
-            List<Flower> flowers = database.flowerDao().getFlowersByCategorySync(category);
-            StringBuilder sb = new StringBuilder();
-            sb.append("Gợi ý hoa loại \"").append(category).append("\":\n");
-            for (int i = 0; i < flowers.size(); i++) {
-                Flower f = flowers.get(i);
-                sb.append(i + 1).append(". ").append(f.flowerName)
-                        .append(" (").append(String.format("%.0f", f.price)).append(" VND)\n");
-            }
-            runOnUiThread(() -> addBotMessage(sb.toString()));
-        }).start();
-    }
-
-    private void showConsultDialog() {
-        String[] categories = {"Sinh Nhật", "Khai Trương", "Chia Buồn", "Hoa Cưới", "Hoa Bó"};
-        new AlertDialog.Builder(this)
-                .setTitle("Chọn dịp")
-                .setItems(categories, (dialog, which) -> {
-                    String cat = "";
-                    switch (which) {
-                        case 0: cat = "Sinh Nhat"; break;
-                        case 1: cat = "Khai Truong"; break;
-                        case 2: cat = "Chia Buon"; break;
-                        case 3: cat = "Hoa Cuoi"; break;
-                        case 4: cat = "Hoa Bo"; break;
-                    }
-                    addUserMessage("Tư vấn hoa " + categories[which]);
-                    respondWithFlowers(cat);
-                })
-                .show();
-    }
-
-    private void showCardDialog() {
-        String[] occasions = {"Sinh Nhật", "Khai Trương", "Chia Buồn", "Hoa Cưới"};
-        new AlertDialog.Builder(this)
-                .setTitle("Chọn dịp viết thiệp")
-                .setItems(occasions, (dialog, which) -> {
-                    String occasion = "";
-                    switch (which) {
-                        case 0: occasion = "Sinh Nhat"; break;
-                        case 1: occasion = "Khai Truong"; break;
-                        case 2: occasion = "Chia Buon"; break;
-                        case 3: occasion = "Hoa Cuoi"; break;
-                    }
-                    showCardForm(occasion, occasions[which]);
-                })
-                .show();
-    }
-
-    private void showCardForm(String occasion, String displayName) {
-        View view = getLayoutInflater().inflate(R.layout.dialog_card_form, null);
-        EditText etTen = view.findViewById(R.id.etTen);
-        EditText etMessage = view.findViewById(R.id.etMessage);
-        EditText etNguoiGui = view.findViewById(R.id.etNguoiGui);
-
-        new AlertDialog.Builder(this)
-                .setTitle("Viết thiệp: " + displayName)
-                .setView(view)
-                .setPositiveButton("Tạo thiệp", (dialog, which) -> {
-                    String ten = etTen.getText().toString();
-                    String msg = etMessage.getText().toString();
-                    String nguoiGui = etNguoiGui.getText().toString();
-
-                    new Thread(() -> {
-                        com.example.flowershop.database.entity.CardTemplate template =
-                                database.cardTemplateDao().getByOccasion(occasion);
-                        runOnUiThread(() -> {
-                            if (template != null) {
-                                String card = template.template
-                                        .replace("{ten}", ten)
-                                        .replace("{message}", msg)
-                                        .replace("{nguoi_gui}", nguoiGui);
-                                addUserMessage("Viết thiệp " + displayName);
-                                addBotMessage("Thiệp của bạn:\n" + card);
-                            }
-                        });
-                    }).start();
-                })
-                .setNegativeButton("Hủy", null)
-                .show();
-    }
-
-    private void showRecognizeDialog() {
-        String[] options = {"Chụp ảnh", "Chọn từ thư viện", "Tự chọn loại hoa"};
-        new AlertDialog.Builder(this)
-                .setTitle("Nhận diện hoa")
-                .setItems(options, (dialog, which) -> {
-                    switch (which) {
-                        case 0:
-                        case 1:
-                            addUserMessage("Nhận diện hoa qua ảnh");
-                            addBotMessage("Tính năng nhận diện ảnh đang được phát triển. Bạn có thể tự chọn loại hoa bên dưới.");
-                            showFlowerCategoryDialog();
-                            break;
-                        case 2:
-                            showFlowerCategoryDialog();
-                            break;
-                    }
-                })
-                .show();
-    }
-
-    private void showFlowerCategoryDialog() {
-        String[] categories = {"Hoa Bó", "Sinh Nhật", "Khai Trương", "Chia Buồn", "Hoa Cưới"};
-        new AlertDialog.Builder(this)
-                .setTitle("Chọn loại hoa")
-                .setItems(categories, (dialog, which) -> {
-                    String cat = "";
-                    switch (which) {
-                        case 0: cat = "Hoa Bo"; break;
-                        case 1: cat = "Sinh Nhat"; break;
-                        case 2: cat = "Khai Truong"; break;
-                        case 3: cat = "Chia Buon"; break;
-                        case 4: cat = "Hoa Cuoi"; break;
-                    }
-                    addUserMessage("Hoa loại: " + categories[which]);
-                    respondWithFlowers(cat);
-                })
-                .show();
-    }
-
     private void addUserMessage(String message) {
-        messages.add(new ChatMessage(message, ChatMessage.TYPE_USER));
+        messages.add(new ChatMessage(message, true));
         adapter.notifyItemInserted(messages.size() - 1);
-        rvChat.scrollToPosition(messages.size() - 1);
+        recyclerView.scrollToPosition(messages.size() - 1);
     }
 
     private void addBotMessage(String message) {
-        messages.add(new ChatMessage(message, ChatMessage.TYPE_BOT));
+        messages.add(new ChatMessage(message, false));
         adapter.notifyItemInserted(messages.size() - 1);
-        rvChat.scrollToPosition(messages.size() - 1);
+        recyclerView.scrollToPosition(messages.size() - 1);
     }
 }

@@ -1,0 +1,5 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 4D tương đương với độ đục 30%, FFFFFF là màu trắng -->
+    <solid android:color="#4DFFFFFF"/>
+    <corners android:radius="20dp"/>
+</shape>

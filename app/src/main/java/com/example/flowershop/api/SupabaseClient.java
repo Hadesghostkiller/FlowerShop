@@ -13,7 +13,6 @@ public class SupabaseClient {
 
     public static Retrofit getClient() {
         if (retrofit == null) {
-            // Logging interceptor (optional)
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
@@ -26,7 +25,7 @@ public class SupabaseClient {
                                 .method(original.method(), original.body());
                         return chain.proceed(requestBuilder.build());
                     })
-                    .addInterceptor(logging) // Enable logging
+                    .addInterceptor(logging)
                     .build();
 
             retrofit = new Retrofit.Builder()

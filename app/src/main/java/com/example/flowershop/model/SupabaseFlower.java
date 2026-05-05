@@ -21,13 +21,5 @@ public class SupabaseFlower {
     @SerializedName("category")
     public String category;
 
-    // Constructor
     public SupabaseFlower() {}
-
-    // Convert to local Flower entity
-    public com.example.flowershop.database.entity.Flower toFlower() {
-        return new com.example.flowershop.database.entity.Flower(
-                id, flowerName, price, imageResource, category, stock
-        );
-    }
 }

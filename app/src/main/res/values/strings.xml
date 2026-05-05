@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Flower Shop</string>
+    <string name="default_web_client_id">910604822122-e783j60mhm1tmgprs0d23c6bcl3dqf9j.apps.googleusercontent.com</string>
+    <string name="facebook_app_id">939039932278426</string>
+    <string name="fb_login_protocol_scheme">fb939039932278426</string>
+    <string name="facebook_client_token">2f3e262aedc36846ba900bd4339e18c7</string>
+    <string name="search_hint">Search by any keyword, e.g. red, rose, and bouquet...</string>
+    <string name="today_theme">Chủ đề ngày hôm nay</string>
+    <string name="browse_category">BROWSE BY CATEGORY</string>
+    <string name="browse_occasions">BROWSE BY OCCASIONS</string>
+    <string name="best_seller">BEST SELLER</string>
+    <string name="nav_home">Home</string>
 </resources>

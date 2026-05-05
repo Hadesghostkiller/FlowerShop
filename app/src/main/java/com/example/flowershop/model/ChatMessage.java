@@ -1,14 +1,19 @@
 package com.example.flowershop.model;
 
 public class ChatMessage {
-    public static final int TYPE_USER = 0;
-    public static final int TYPE_BOT = 1;
+    private String message;
+    private boolean isUser;
 
-    public String message;
-    public int type;
-
-    public ChatMessage(String message, int type) {
+    public ChatMessage(String message, boolean isUser) {
         this.message = message;
-        this.type = type;
+        this.isUser = isUser;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public boolean isUser() {
+        return isUser;
     }
 }

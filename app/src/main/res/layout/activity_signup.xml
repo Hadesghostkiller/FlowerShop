@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <!-- 1. Blob hồng phía trên: Đã dịch sang bên phải -->
+    <View
+        android:id="@+id/topBlob"
+        android:layout_width="500dp"
+        android:layout_height="500dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="-150dp"
+        android:layout_marginTop="-200dp"
+        android:background="@drawable/bg_pink_circle" />
+
+    <!-- 2. Tiêu đề: Đã chỉnh lại lề trên vì không còn hình minh họa -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="90dp"
+        android:layout_marginTop="100dp"
+        android:fontFamily="@font/poppins_regular"
+        android:text="Create\nAccount"
+        android:textColor="#333333"
+        android:textSize="42sp"
+        android:textStyle="bold" />
+
+    <!-- 3. Form nhập liệu -->
+    <LinearLayout
+        android:id="@+id/formLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvTitle"
+        android:layout_marginHorizontal="40dp"
+        android:layout_marginTop="30dp"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/etGmail"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_edittext"
+            android:fontFamily="@font/poppins_regular"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:paddingHorizontal="20dp"
+            android:layout_marginBottom="12dp"
+            android:textSize="15sp"/>
+
+        <EditText
+            android:id="@+id/etUsername"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_edittext"
+            android:fontFamily="@font/poppins_regular"
+            android:hint="Username"
+            android:paddingHorizontal="20dp"
+            android:layout_marginBottom="12dp"
+            android:textSize="15sp"/>
+
+        <EditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_edittext"
+            android:fontFamily="@font/poppins_regular"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:paddingHorizontal="20dp"
+            android:textSize="15sp"/>
+
+        <TextView
+            android:id="@+id/tvError"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#D32F2F"
+            android:textSize="12sp"
+            android:layout_marginTop="5dp"
+            android:textStyle="italic"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+    <!-- 4. Hàng nút Sign Up -->
+    <RelativeLayout
+        android:id="@+id/signUpRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/formLayout"
+        android:layout_marginHorizontal="40dp"
+        android:layout_marginTop="35dp">
+
+        <TextView
+            android:id="@+id/btnSignUp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="Sign Up"
+            android:textColor="#333333"
+            android:textSize="26sp"
+            android:fontFamily="@font/poppins_regular"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+    </RelativeLayout>
+
+    <!-- 5. Blob hồng phía dưới và nút chuyển sang Đăng nhập -->
+    <View
+        android:id="@+id/bottomBlob"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="-110dp"
+        android:layout_marginEnd="-60dp"
+        android:background="@drawable/bg_pink_circle" />
+
+    <TextView
+        android:id="@+id/tvBackToLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="35dp"
+        android:layout_marginEnd="20dp"
+        android:text="Sign In"
+        android:textColor="#333333"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:padding="10dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:fontFamily="@font/poppins_regular" />
+
+</RelativeLayout>

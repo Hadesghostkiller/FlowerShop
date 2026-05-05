@@ -1,5 +1,7 @@
 package com.example.flowershop.adapters;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,25 +13,32 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.flowershop.R;
-import com.example.flowershop.database.entity.Flower;
+import com.example.flowershop.model.SupabaseFlower;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerViewHolder> {
 
-    private List<Flower> flowers = new ArrayList<>();
+    private List<SupabaseFlower> flowers = new ArrayList<>();
     private OnAddToCartListener listener;
+    private int layoutResId = R.layout.item_flower;
 
     public interface OnAddToCartListener {
-        void onAddToCart(Flower flower);
+        void onAddToCart(SupabaseFlower flower);
     }
 
     public FlowerAdapter(OnAddToCartListener listener) {
         this.listener = listener;
     }
 
-    public void setFlowers(List<Flower> flowers) {
+    public FlowerAdapter(OnAddToCartListener listener, int layoutResId) {
+        this.listener = listener;
+        this.layoutResId = layoutResId;
+    }
+
+    public void setFlowersFromSupabase(List<SupabaseFlower> flowers) {
         this.flowers = flowers;
         notifyDataSetChanged();
     }
@@ -38,13 +47,13 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
     @Override
     public FlowerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_flower, parent, false);
+                .inflate(layoutResId, parent, false);
         return new FlowerViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull FlowerViewHolder holder, int position) {
-        Flower flower = flowers.get(position);
+        SupabaseFlower flower = flowers.get(position);
         holder.bind(flower);
     }
 
@@ -67,44 +76,37 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
             btnAddToCart = itemView.findViewById(R.id.btnAddToCart);
         }
 
-        void bind(Flower flower) {
+        void bind(SupabaseFlower flower) {
+            Context context = itemView.getContext();
             tvFlowerName.setText(flower.flowerName);
             tvCategory.setText(flower.category);
             tvPrice.setText(String.format("%.0f VND", flower.price));
-            
-            // Load and scale image properly
-            loadScaledImage(ivFlower, flower.imageResource);
-            
-            btnAddToCart.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onAddToCart(flower);
-                }
-            });
-        }
-        
-        private void loadScaledImage(ImageView imageView, String imageName) {
-            try {
-                // Get resource ID from image name
-                int resId = imageView.getContext().getResources().getIdentifier(
-                    imageName, "drawable", imageView.getContext().getPackageName());
-                
-                if (resId != 0) {
-                    // Decode with sampling to reduce memory
-                    android.graphics.BitmapFactory.Options options = new android.graphics.BitmapFactory.Options();
-                    options.inSampleSize = 2; // Scale down by 2x
-                    android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeResource(
-                        imageView.getContext().getResources(), resId, options);
-                    
-                    if (bitmap != null) {
-                        imageView.setImageBitmap(bitmap);
-                    } else {
-                        imageView.setImageResource(R.drawable.ic_launcher_foreground);
+
+            if (ivFlower != null) {
+                try {
+                    String path = "flower_image/" + flower.imageResource + ".png";
+                    InputStream is = context.getAssets().open(path);
+                    Drawable d = Drawable.createFromStream(is, null);
+                    ivFlower.setImageDrawable(d);
+                    is.close();
+                } catch (Exception e) {
+                    try {
+                        InputStream isDefault = context.getAssets().open("flower_image/default.png");
+                        Drawable dDefault = Drawable.createFromStream(isDefault, null);
+                        ivFlower.setImageDrawable(dDefault);
+                        isDefault.close();
+                    } catch (Exception ex) {
+                        ivFlower.setImageResource(android.R.drawable.ic_menu_report_image);
                     }
-                } else {
-                    imageView.setImageResource(R.drawable.ic_launcher_foreground);
                 }
-            } catch (Exception e) {
-                imageView.setImageResource(R.drawable.ic_launcher_foreground);
+            }
+
+            if (btnAddToCart != null) {
+                btnAddToCart.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onAddToCart(flower);
+                    }
+                });
             }
         }
     }

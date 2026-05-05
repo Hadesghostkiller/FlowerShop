@@ -2,102 +2,108 @@ package com.example.flowershop.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
+import android.util.Log;
+import android.widget.AutoCompleteTextView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 import com.example.flowershop.R;
-import com.facebook.login.LoginManager;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.example.flowershop.adapters.BannerAdapter;
+import com.example.flowershop.adapters.FlowerAdapter;
+import com.example.flowershop.api.SupabaseClient;
+import com.example.flowershop.model.Banner;
+import com.example.flowershop.model.SupabaseFlower;
+import com.example.flowershop.sync.SupabaseSync;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
+import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MenuActivity extends AppCompatActivity {
-
-    private String username;
-    private String fullname;
-    private GoogleSignInClient mGoogleSignInClient;
+    private ViewPager2 viewPagerBanner;
+    private TabLayout tabDots;
+    private RecyclerView rvBestSeller;
+    private FlowerAdapter bestSellerAdapter;
+    private FirebaseAuth mAuth;
+    private AutoCompleteTextView autoCompleteSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
+        mAuth = FirebaseAuth.getInstance();
+        initViews();
+        setupBottomNavigation();
+        loadBanners();
+        loadBestSellers();
+    }
 
-        // 1. Cấu hình Google Sign-In để có thể đăng xuất
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+    private void initViews() {
+        viewPagerBanner = findViewById(R.id.viewPagerBanner);
+        tabDots = findViewById(R.id.tabDots);
+        rvBestSeller = findViewById(R.id.rvBestSeller);
+        autoCompleteSearch = findViewById(R.id.autoCompleteSearch);
 
-        // 2. Nhận dữ liệu từ Intent
-        username = getIntent().getStringExtra("username");
-        fullname = getIntent().getStringExtra("fullname");
+        autoCompleteSearch.setFocusable(false);
+        autoCompleteSearch.setOnClickListener(v -> startActivity(new Intent(this, SearchActivity.class)));
 
-        TextView tvWelcome = findViewById(R.id.tvWelcome);
-        tvWelcome.setText("Xin chào, " + (fullname != null ? fullname : "bạn") + "!");
+        findViewById(R.id.btnMenuToggle).setOnClickListener(v -> Toast.makeText(this, "Menu...", Toast.LENGTH_SHORT).show());
+        findViewById(R.id.btnNotification).setOnClickListener(v -> Toast.makeText(this, "No notifications", Toast.LENGTH_SHORT).show());
+        findViewById(R.id.btnChatbot).setOnClickListener(v -> startActivity(new Intent(this, ChatbotActivity.class)));
+    }
 
-        // --- Xử lý sự kiện Click ---
-
-        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
-
-        findViewById(R.id.tvLogout).setOnClickListener(v -> {
-            performLogout();
-        });
-
-        // Các nút chức năng khác
-        Button btnShop = findViewById(R.id.btnShop);
-        Button btnSearch = findViewById(R.id.btnSearch);
-        Button btnCart = findViewById(R.id.btnCart);
-
-        btnShop.setOnClickListener(v -> {
-            Intent intent = new Intent(MenuActivity.this, MainActivity.class);
-            intent.putExtra("username", username);
-            startActivity(intent);
-        });
-
-        btnSearch.setOnClickListener(v -> {
-            Intent intent = new Intent(MenuActivity.this, SearchActivity.class);
-            intent.putExtra("username", username);
-            startActivity(intent);
-        });
-
-        btnCart.setOnClickListener(v -> {
-            Intent intent = new Intent(MenuActivity.this, CartActivity.class);
-            intent.putExtra("username", username);
-            startActivity(intent);
-        });
-
-        findViewById(R.id.btnChatbot).setOnClickListener(v -> {
-            Intent intent = new Intent(MenuActivity.this, ChatbotActivity.class);
-            startActivity(intent);
+    private void setupBottomNavigation() {
+        findViewById(R.id.navCartContainer).setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
+        findViewById(R.id.navProfileContainer).setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        findViewById(R.id.navProfileContainer).setOnLongClickListener(v -> {
+            mAuth.signOut();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return true;
         });
     }
 
-    /**
-     * Logic đăng xuất tổng hợp: Firebase, Google và Facebook
-     */
-    private void performLogout() {
-        // 1. Đăng xuất khỏi Firebase
-        FirebaseAuth.getInstance().signOut();
+    private void loadBanners() {
+        SupabaseClient.getApi().getBanners().enqueue(new Callback<List<Banner>>() {
+            @Override
+            public void onResponse(Call<List<Banner>> call, Response<List<Banner>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    BannerAdapter adapter = new BannerAdapter(MenuActivity.this, response.body());
+                    viewPagerBanner.setAdapter(adapter);
+                    new TabLayoutMediator(tabDots, viewPagerBanner, (tab, position) -> {}).attach();
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Banner>> call, Throwable t) {
+                Log.e("BANNER_ERROR", t.getMessage());
+            }
+        });
+    }
 
-        // 2. Đăng xuất khỏi Google (Xóa session để lần sau hiện bảng chọn tài khoản)
-        mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
-            // Sau khi Google sign out xong thì làm tiếp Facebook
-            // 3. Đăng xuất khỏi Facebook
-            LoginManager.getInstance().logOut();
+    private void loadBestSellers() {
+        bestSellerAdapter = new FlowerAdapter(f -> Toast.makeText(this, f.flowerName, Toast.LENGTH_SHORT).show());
+        rvBestSeller.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvBestSeller.setAdapter(bestSellerAdapter);
 
-            // Thông báo và quay về màn hình Login
-            Toast.makeText(MenuActivity.this, "Đã đăng xuất!", Toast.LENGTH_SHORT).show();
+        SupabaseClient.getApi().getBestSellers().enqueue(new retrofit2.Callback<List<SupabaseFlower>>() {
+            @Override
+            public void onResponse(retrofit2.Call<List<SupabaseFlower>> call, retrofit2.Response<List<SupabaseFlower>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    runOnUiThread(() -> bestSellerAdapter.setFlowersFromSupabase(response.body()));
+                }
+            }
 
-            Intent intent = new Intent(MenuActivity.this, LoginActivity.class);
-            // Xóa sạch stack các Activity cũ để không thể nhấn Back quay lại Menu
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
+            @Override
+            public void onFailure(retrofit2.Call<List<SupabaseFlower>> call, Throwable t) {
+                runOnUiThread(() -> Toast.makeText(MenuActivity.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show());
+            }
         });
     }
 }
