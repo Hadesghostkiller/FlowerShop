@@ -1,6 +1,7 @@
 package com.example.flowershop.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.flowershop.R;
+import com.example.flowershop.activities.ProductDetailActivity;
 import com.example.flowershop.model.SupabaseFlower;
 
 import java.io.InputStream;
@@ -55,6 +57,12 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
     public void onBindViewHolder(@NonNull FlowerViewHolder holder, int position) {
         SupabaseFlower flower = flowers.get(position);
         holder.bind(flower);
+        
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), ProductDetailActivity.class);
+            intent.putExtra("flower", flower);
+            v.getContext().startActivity(intent);
+        });
     }
 
     @Override
