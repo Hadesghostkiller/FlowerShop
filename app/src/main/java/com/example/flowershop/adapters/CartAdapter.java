@@ -1,9 +1,11 @@
 package com.example.flowershop.adapters;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -14,16 +16,24 @@ import com.example.flowershop.R;
 import com.example.flowershop.model.CartItem;
 import com.example.flowershop.model.SupabaseFlower;
 
+import java.io.InputStream;
 import java.util.List;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
 
     private Context context;
     private List<CartItem> cartItemList;
+    private OnCartItemDeleteListener deleteListener;
 
-    public CartAdapter(Context context, List<CartItem> cartItemList) {
+    // Interface để báo cho Activity biết khi người dùng bấm xóa
+    public interface OnCartItemDeleteListener {
+        void onDeleteClick(CartItem item);
+    }
+
+    public CartAdapter(Context context, List<CartItem> cartItemList, OnCartItemDeleteListener listener) {
         this.context = context;
         this.cartItemList = cartItemList;
+        this.deleteListener = listener;
     }
 
     @NonNull
@@ -42,25 +52,41 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             holder.tvName.setText(flower.flowerName != null ? flower.flowerName : "Hoa chưa rõ tên");
             holder.tvPrice.setText(String.format("%,.0f VND", flower.price));
 
-            // TODO: Nếu bạn dùng Glide/Picasso để load ảnh từ link URL, code tại đây:
-            // Glide.with(context).load(flower.image_resource).into(holder.ivImage);
+            // Load ảnh từ thư mục assets/flower_image/
+            if (flower.imageResource != null && !flower.imageResource.isEmpty()) {
+                try {
+                    // Tương tự ở đây cũng sửa thành imageResource
+                    String imagePath = "flower_image/" + flower.imageResource + ".png";
+                    InputStream is = context.getAssets().open(imagePath);
+                    Drawable d = Drawable.createFromStream(is, null);
+                    holder.ivImage.setImageDrawable(d);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    holder.ivImage.setImageResource(android.R.drawable.ic_menu_gallery);
+                }
+            }
+
         }
 
         holder.tvQuantity.setText("x" + cartItem.getQuantity());
+
+        // Bắt sự kiện bấm nút Xóa
+        holder.btnDelete.setOnClickListener(v -> {
+            if (deleteListener != null) {
+                deleteListener.onDeleteClick(cartItem);
+            }
+        });
     }
 
-    // Quan trọng: Hàm này quyết định số lượng item hiển thị
     @Override
     public int getItemCount() {
-        if (cartItemList != null) {
-            return cartItemList.size();
-        }
-        return 0;
+        return cartItemList != null ? cartItemList.size() : 0;
     }
 
     public static class CartViewHolder extends RecyclerView.ViewHolder {
         ImageView ivImage;
         TextView tvName, tvPrice, tvQuantity;
+        ImageButton btnDelete;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -68,6 +94,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             tvName = itemView.findViewById(R.id.tvCartName);
             tvPrice = itemView.findViewById(R.id.tvCartPrice);
             tvQuantity = itemView.findViewById(R.id.tvCartQuantity);
+            btnDelete = itemView.findViewById(R.id.btnDeleteCartItem);
         }
     }
 }

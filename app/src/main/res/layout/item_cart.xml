@@ -21,7 +21,6 @@
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:scaleType="centerCrop"
-            android:src="@android:drawable/ic_menu_gallery"
             android:background="#EEEEEE" />
 
         <!-- Tên và Giá -->
@@ -60,7 +59,16 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="#555555"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginEnd="16dp"/>
+
+        <!-- Nút Xóa -->
+        <ImageButton
+            android:id="@+id/btnDeleteCartItem"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_delete"
+            app:tint="#F44336" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>
