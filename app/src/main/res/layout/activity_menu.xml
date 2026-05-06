@@ -47,22 +47,10 @@
                 app:layout_constraintEnd_toEndOf="parent" />
 
             <ImageView
-                android:id="@+id/btnLanguage"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginEnd="16dp"
-                android:contentDescription="Language"
-                android:src="@drawable/ic_language"
-                app:layout_constraintBottom_toBottomOf="@+id/ivLogo"
-                app:layout_constraintEnd_toStartOf="@+id/btnNotification"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="#E91E63" />
-
-            <ImageView
                 android:id="@+id/btnNotification"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_marginEnd="20dp"
+                android:layout_marginEnd="16dp"
                 android:contentDescription="Notifications"
                 android:src="@drawable/ic_notification"
                 app:layout_constraintBottom_toBottomOf="@+id/ivLogo"
@@ -74,7 +62,6 @@
                 android:id="@+id/btnChatbot"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:layout_marginEnd="8dp"
                 android:src="@drawable/ic_chatbot"
                 android:contentDescription="AI Chatbot"
                 app:tint="#E91E63"
