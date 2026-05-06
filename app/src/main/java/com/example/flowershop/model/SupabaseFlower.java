@@ -1,8 +1,9 @@
 package com.example.flowershop.model;
 
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 
-public class SupabaseFlower {
+public class SupabaseFlower implements Serializable {
     @SerializedName("id")
     public int id;
 
@@ -20,6 +21,9 @@ public class SupabaseFlower {
 
     @SerializedName("category")
     public String category;
+
+    @SerializedName("note")
+    public String note;
 
     public SupabaseFlower() {}
 }
