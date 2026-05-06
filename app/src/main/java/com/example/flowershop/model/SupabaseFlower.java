@@ -26,4 +26,5 @@ public class SupabaseFlower implements Serializable {
     public String note;
 
     public SupabaseFlower() {}
+
 }

@@ -21,6 +21,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import retrofit2.Call;
@@ -34,7 +35,6 @@ public class CartActivity extends AppCompatActivity {
     private Button btnCheckout;
     private ImageButton btnBack;
 
-    // Đảm bảo khai báo ở đây, chữ 'c' viết thường
     private CartAdapter cartAdapter;
     private List<CartItem> cartItemList;
     private String currentUserId;
@@ -71,8 +71,8 @@ public class CartActivity extends AppCompatActivity {
         cartItemList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Khởi tạo đối tượng cartAdapter
-        cartAdapter = new CartAdapter(this, cartItemList);
+        // Khởi tạo Adapter và lắng nghe sự kiện XÓA
+        cartAdapter = new CartAdapter(this, cartItemList, itemToDelete -> deleteItemFromCart(itemToDelete));
         recyclerView.setAdapter(cartAdapter);
 
         btnBack.setOnClickListener(v -> finish());
@@ -92,10 +92,25 @@ public class CartActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     try {
                         if (response.isSuccessful() && response.body() != null) {
+                            List<CartItem> rawList = response.body();
                             cartItemList.clear();
-                            cartItemList.addAll(response.body());
 
-                            // Gọi từ đối tượng chữ 'c' viết thường
+                            // LOGIC GỘP CÁC SẢN PHẨM TRÙNG NHAU (x2, x3...)
+                            HashMap<Integer, CartItem> mergedMap = new HashMap<>();
+                            for (CartItem item : rawList) {
+                                int fId = item.getFlower_id();
+                                if (mergedMap.containsKey(fId)) {
+                                    // Nếu đã có hoa này trong Map, lấy ra và cộng thêm số lượng
+                                    CartItem existingItem = mergedMap.get(fId);
+                                    existingItem.setQuantity(existingItem.getQuantity() + item.getQuantity());
+                                } else {
+                                    // Nếu chưa có, thêm mới vào Map
+                                    mergedMap.put(fId, item);
+                                }
+                            }
+
+                            // Đổ dữ liệu đã gộp vào danh sách hiển thị
+                            cartItemList.addAll(mergedMap.values());
                             cartAdapter.notifyDataSetChanged();
 
                             if (cartItemList.isEmpty()) {
@@ -123,6 +138,34 @@ public class CartActivity extends AppCompatActivity {
                     tvEmpty.setText("Lỗi kết nối: \n" + t.getMessage());
                     tvEmpty.setVisibility(View.VISIBLE);
                 });
+            }
+        });
+    }
+
+    // HÀM XỬ LÝ KHI BẤM NÚT XÓA SẢN PHẨM
+    private void deleteItemFromCart(CartItem item) {
+        Toast.makeText(this, "Đang xóa...", Toast.LENGTH_SHORT).show();
+        SupabaseApi api = SupabaseClient.getApi();
+
+        // Tạo query để xóa TẤT CẢ các dòng có chung user_id và flower_id
+        String qUserId = "eq." + currentUserId;
+        String qFlowerId = "eq." + item.getFlower_id();
+
+        api.deleteCartItem(qUserId, qFlowerId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(CartActivity.this, "Đã xóa sản phẩm", Toast.LENGTH_SHORT).show();
+                    // Tải lại giỏ hàng sau khi xóa thành công
+                    loadCartData();
+                } else {
+                    Toast.makeText(CartActivity.this, "Lỗi khi xóa: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(CartActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
