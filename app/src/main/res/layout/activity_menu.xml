@@ -262,7 +262,8 @@
             android:baselineAligned="false"
             android:gravity="center"
             android:orientation="horizontal"
-            android:weightSum="4">
+            android:weightSum="4"
+            android:paddingHorizontal="5dp">
 
             <LinearLayout
                 android:id="@+id/navWishlistContainer"
