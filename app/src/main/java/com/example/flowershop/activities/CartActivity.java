@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +33,7 @@ public class CartActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private TextView tvEmpty, tvTotalItems, tvTotalPrice;
+    private CheckBox cbSelectAll; // THÊM MỚI
     private Button btnCheckout;
     private ImageButton btnBack;
 
@@ -39,6 +41,7 @@ public class CartActivity extends AppCompatActivity {
     private List<CartItem> cartItemList;
     private String currentUserId;
     private FirebaseAuth mAuth;
+    private boolean isProgrammaticChange = false; // Tránh loop sự kiện
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,15 +68,34 @@ public class CartActivity extends AppCompatActivity {
         tvEmpty = findViewById(R.id.tvEmpty);
         tvTotalItems = findViewById(R.id.tvTotalItems);
         tvTotalPrice = findViewById(R.id.tvTotalPrice);
+        cbSelectAll = findViewById(R.id.cbSelectAll); // Ánh xạ
         btnCheckout = findViewById(R.id.btnCheckout);
         btnBack = findViewById(R.id.btnBack);
 
         cartItemList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Khởi tạo Adapter và lắng nghe sự kiện XÓA
-        cartAdapter = new CartAdapter(this, cartItemList, itemToDelete -> deleteItemFromCart(itemToDelete));
+        // Khởi tạo Adapter với 2 Listener (Xóa và Check)
+        cartAdapter = new CartAdapter(this, cartItemList,
+                itemToDelete -> deleteItemFromCart(itemToDelete),
+                (item, isChecked) -> {
+                    // Khi tick/bỏ tick 1 item lẻ
+                    updateSelectAllCheckboxState();
+                    calculateTotal();
+                }
+        );
         recyclerView.setAdapter(cartAdapter);
+
+        // Sự kiện "Chọn tất cả"
+        cbSelectAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isProgrammaticChange) return; // Nếu code đang tự đổi state thì bỏ qua
+
+            for (CartItem item : cartItemList) {
+                item.setSelected(isChecked);
+            }
+            cartAdapter.notifyDataSetChanged(); // Cập nhật lại UI list
+            calculateTotal();
+        });
 
         btnBack.setOnClickListener(v -> finish());
         btnCheckout.setOnClickListener(v -> checkout());
@@ -95,31 +117,35 @@ public class CartActivity extends AppCompatActivity {
                             List<CartItem> rawList = response.body();
                             cartItemList.clear();
 
-                            // LOGIC GỘP CÁC SẢN PHẨM TRÙNG NHAU (x2, x3...)
                             HashMap<Integer, CartItem> mergedMap = new HashMap<>();
                             for (CartItem item : rawList) {
+                                // Mặc định khi tải về là được tick
+                                item.setSelected(true);
+
                                 int fId = item.getFlower_id();
                                 if (mergedMap.containsKey(fId)) {
-                                    // Nếu đã có hoa này trong Map, lấy ra và cộng thêm số lượng
                                     CartItem existingItem = mergedMap.get(fId);
                                     existingItem.setQuantity(existingItem.getQuantity() + item.getQuantity());
                                 } else {
-                                    // Nếu chưa có, thêm mới vào Map
                                     mergedMap.put(fId, item);
                                 }
                             }
 
-                            // Đổ dữ liệu đã gộp vào danh sách hiển thị
                             cartItemList.addAll(mergedMap.values());
                             cartAdapter.notifyDataSetChanged();
 
                             if (cartItemList.isEmpty()) {
                                 tvEmpty.setText("Giỏ hàng của bạn đang trống");
                                 tvEmpty.setVisibility(View.VISIBLE);
+                                cbSelectAll.setVisibility(View.GONE); // Ẩn nút chọn tất cả
                                 if (tvTotalPrice != null) tvTotalPrice.setText("0 VND");
                                 if (tvTotalItems != null) tvTotalItems.setText("0");
                             } else {
                                 tvEmpty.setVisibility(View.GONE);
+                                cbSelectAll.setVisibility(View.VISIBLE);
+                                isProgrammaticChange = true;
+                                cbSelectAll.setChecked(true); // Mặc định chọn tất cả
+                                isProgrammaticChange = false;
                                 calculateTotal();
                             }
                         } else {
@@ -142,12 +168,10 @@ public class CartActivity extends AppCompatActivity {
         });
     }
 
-    // HÀM XỬ LÝ KHI BẤM NÚT XÓA SẢN PHẨM
     private void deleteItemFromCart(CartItem item) {
         Toast.makeText(this, "Đang xóa...", Toast.LENGTH_SHORT).show();
         SupabaseApi api = SupabaseClient.getApi();
 
-        // Tạo query để xóa TẤT CẢ các dòng có chung user_id và flower_id
         String qUserId = "eq." + currentUserId;
         String qFlowerId = "eq." + item.getFlower_id();
 
@@ -156,7 +180,6 @@ public class CartActivity extends AppCompatActivity {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(CartActivity.this, "Đã xóa sản phẩm", Toast.LENGTH_SHORT).show();
-                    // Tải lại giỏ hàng sau khi xóa thành công
                     loadCartData();
                 } else {
                     Toast.makeText(CartActivity.this, "Lỗi khi xóa: " + response.code(), Toast.LENGTH_SHORT).show();
@@ -170,19 +193,38 @@ public class CartActivity extends AppCompatActivity {
         });
     }
 
+    // THÊM MỚI: Kiểm tra xem tất cả các mục có đang được tick hay không
+    private void updateSelectAllCheckboxState() {
+        if (cartItemList.isEmpty()) return;
+        boolean allSelected = true;
+        for (CartItem item : cartItemList) {
+            if (!item.isSelected()) {
+                allSelected = false;
+                break;
+            }
+        }
+
+        isProgrammaticChange = true;
+        cbSelectAll.setChecked(allSelected);
+        isProgrammaticChange = false;
+    }
+
     private void calculateTotal() {
         try {
             int totalItems = 0;
             double totalPrice = 0;
 
             for (CartItem item : cartItemList) {
-                totalItems += item.getQuantity();
+                // SỬA ĐỔI: Chỉ cộng tiền những món ĐƯỢC TICK
+                if (item.isSelected()) {
+                    totalItems += item.getQuantity();
 
-                if (item.getFlowers() != null) {
-                    try {
-                        totalPrice += (item.getQuantity() * item.getFlowers().price);
-                    } catch (Exception e) {
-                        Log.e("CART_CRASH", "Lỗi tính giá tiền: " + e.getMessage());
+                    if (item.getFlowers() != null) {
+                        try {
+                            totalPrice += (item.getQuantity() * item.getFlowers().price);
+                        } catch (Exception e) {
+                            Log.e("CART_CRASH", "Lỗi tính giá tiền: " + e.getMessage());
+                        }
                     }
                 }
             }
@@ -201,10 +243,25 @@ public class CartActivity extends AppCompatActivity {
     }
 
     private void checkout() {
+        // Kiểm tra xem có sản phẩm nào được chọn không
+        boolean hasSelectedItem = false;
+        for (CartItem item : cartItemList) {
+            if (item.isSelected()) {
+                hasSelectedItem = true;
+                break;
+            }
+        }
+
         if (cartItemList.isEmpty()) {
             Toast.makeText(this, "Giỏ hàng đang trống!", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        if (!hasSelectedItem) {
+            Toast.makeText(this, "Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Toast.makeText(this, "Chức năng thanh toán đang phát triển!", Toast.LENGTH_SHORT).show();
     }
 }

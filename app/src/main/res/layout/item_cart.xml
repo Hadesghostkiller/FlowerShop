@@ -15,6 +15,14 @@
         android:padding="12dp"
         android:gravity="center_vertical">
 
+        <!-- Đã sử dụng MaterialCheckBox và app:buttonTint -->
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/cbItemCart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            app:buttonTint="#E91E63" />
+
         <!-- Hình ảnh hoa -->
         <ImageView
             android:id="@+id/ivCartImage"
@@ -68,7 +76,7 @@
             android:layout_height="36dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_delete"
-            app:tint="#F44336" />
+            app:tint="#F44336"/>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

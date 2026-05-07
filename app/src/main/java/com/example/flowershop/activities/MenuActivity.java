@@ -122,7 +122,7 @@ public class MenuActivity extends AppCompatActivity {
             return;
         }
 
-        Toast.makeText(this, "Đang thêm " + flower.flowerName + "...", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Đang thêm " + flower.flowerName + "...", Toast.LENGTH_SHORT).show();
 
         // Chuẩn bị dữ liệu JSON để gửi lên bảng 'cart' trên Supabase
         Map<String, Object> cartData = new HashMap<>();
