@@ -19,12 +19,18 @@ public class SupabaseFlower implements Serializable {
     @SerializedName("image_resource")
     public String imageResource;
 
-    @SerializedName("category")
+    @SerializedName("category_id")
+    public int categoryId;
+
+    @SerializedName("luot_mua")
+    public int luotMua;
+    
+    // Field for joined category name if needed
+    @SerializedName("category_name")
     public String category;
 
     @SerializedName("note")
     public String note;
 
     public SupabaseFlower() {}
-
 }
