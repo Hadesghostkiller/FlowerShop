@@ -13,6 +13,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlowerShop">
         <activity
+            android:name=".activities.AdminAddEditProductActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.AdminManageProductsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.AdminDashboardActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.CategoryActivity"
             android:exported="false" />
         <activity
@@ -28,9 +37,6 @@
             android:name=".activities.ProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.FavoriteActivity"
-            android:exported="false" />
-        <activity
             android:name=".activities.SplashActivity"
             android:exported="true">
             <intent-filter>
@@ -39,6 +45,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />

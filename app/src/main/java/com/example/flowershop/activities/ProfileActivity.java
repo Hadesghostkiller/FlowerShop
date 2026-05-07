@@ -23,21 +23,19 @@ import com.example.flowershop.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ProfileActivity extends AppCompatActivity {
 
     private ImageView imgAvatar, btnBack, btnEditProfile;
     private CardView btnEditAvatar;
     private TextView tvFullName, tvEmail, tvPhone, tvDob;
-    private View menuLogout, menuSettings, menuRating, menuFavorites;
+    // Đã thêm menuProducts
+    private View menuLogout, menuSettings, menuRating, menuProducts;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -103,7 +101,7 @@ public class ProfileActivity extends AppCompatActivity {
         menuLogout = findViewById(R.id.menuLogout);
         menuSettings = findViewById(R.id.menuSettings);
         menuRating = findViewById(R.id.menuRating);
-        menuFavorites = findViewById(R.id.menuFavorites);
+        menuProducts = findViewById(R.id.menuProducts); // Ánh xạ menu Admin
     }
 
     private void loadUser() {
@@ -159,6 +157,7 @@ public class ProfileActivity extends AppCompatActivity {
             startActivityForResult(intent, 100);
         });
 
+        // ĐÃ MỞ KHÓA: Chuyển sang màn hình Đánh giá
         if (menuRating != null) {
             menuRating.setOnClickListener(v -> {
                 Intent intent = new Intent(ProfileActivity.this, RatingActivity.class);
@@ -166,9 +165,11 @@ public class ProfileActivity extends AppCompatActivity {
             });
         }
 
-        if (menuFavorites != null) {
-            menuFavorites.setOnClickListener(v -> {
-                startActivity(new Intent(ProfileActivity.this, FavoriteActivity.class));
+        // MỞ MÀN HÌNH ADMIN QUẢN LÝ CỬA HÀNG
+        if (menuProducts != null) {
+            menuProducts.setOnClickListener(v -> {
+                Intent intent = new Intent(ProfileActivity.this, AdminDashboardActivity.class);
+                startActivity(intent);
             });
         }
 

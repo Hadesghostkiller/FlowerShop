@@ -3,9 +3,6 @@ package com.example.flowershop.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,7 +18,6 @@ import com.example.flowershop.adapters.FlowerAdapter;
 import com.example.flowershop.api.SupabaseClient;
 import com.example.flowershop.model.Banner;
 import com.example.flowershop.model.Category;
-import com.example.flowershop.model.FavoriteItem;
 import com.example.flowershop.model.SupabaseFlower;
 import com.example.flowershop.sync.SupabaseSync;
 import com.google.android.material.tabs.TabLayout;
@@ -29,7 +25,6 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,18 +52,6 @@ public class MenuActivity extends AppCompatActivity {
         loadBanners();
         loadCategories();
         loadBestSellers();
-        
-        // Hiệu ứng nhẹ khi vào trang
-        View navHome = findViewById(R.id.navHomeContainer);
-        if (navHome != null) {
-            animateSelection(navHome);
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        loadFavorites();
     }
 
     private void initViews() {
@@ -87,45 +70,14 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void setupBottomNavigation() {
-        findViewById(R.id.navWishlistContainer).setOnClickListener(v -> {
-            animateSelection(v);
-            Intent intent = new Intent(this, FavoriteActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            startActivity(intent);
-            overridePendingTransition(0, 0);
-        });
-
-        findViewById(R.id.navHomeContainer).setOnClickListener(v -> {
-            animateSelection(v);
-        });
-
-        findViewById(R.id.navCartContainer).setOnClickListener(v -> {
-            animateSelection(v);
-            startActivity(new Intent(this, CartActivity.class));
-        });
-
-        findViewById(R.id.navProfileContainer).setOnClickListener(v -> {
-            animateSelection(v);
-            startActivity(new Intent(this, ProfileActivity.class));
-        });
-        
+        findViewById(R.id.navCartContainer).setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
+        findViewById(R.id.navProfileContainer).setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
         findViewById(R.id.navProfileContainer).setOnLongClickListener(v -> {
             mAuth.signOut();
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return true;
         });
-    }
-
-    private void animateSelection(View view) {
-        ScaleAnimation scaleAnimation = new ScaleAnimation(
-                0.8f, 1.0f,
-                0.8f, 1.0f,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f
-        );
-        scaleAnimation.setDuration(300);
-        view.startAnimation(scaleAnimation);
     }
 
     private void loadBanners() {
@@ -180,41 +132,13 @@ public class MenuActivity extends AppCompatActivity {
             @Override
             public void onResponse(retrofit2.Call<List<SupabaseFlower>> call, retrofit2.Response<List<SupabaseFlower>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    runOnUiThread(() -> {
-                        bestSellerAdapter.setFlowersFromSupabase(response.body());
-                        loadFavorites();
-                    });
+                    runOnUiThread(() -> bestSellerAdapter.setFlowersFromSupabase(response.body()));
                 }
             }
 
             @Override
             public void onFailure(retrofit2.Call<List<SupabaseFlower>> call, Throwable t) {
                 runOnUiThread(() -> Toast.makeText(MenuActivity.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show());
-            }
-        });
-    }
-
-    private void loadFavorites() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) return;
-
-        SupabaseClient.getApi().getFavoritesByUserId("eq." + user.getUid()).enqueue(new Callback<List<FavoriteItem>>() {
-            @Override
-            public void onResponse(Call<List<FavoriteItem>> call, Response<List<FavoriteItem>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Integer> ids = new ArrayList<>();
-                    for (FavoriteItem item : response.body()) {
-                        ids.add((int) item.getFlower_id());
-                    }
-                    if (bestSellerAdapter != null) {
-                        bestSellerAdapter.setFavoriteFlowerIds(ids);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<FavoriteItem>> call, Throwable t) {
-                Log.e("FAVORITE_ERROR", t.getMessage());
             }
         });
     }
