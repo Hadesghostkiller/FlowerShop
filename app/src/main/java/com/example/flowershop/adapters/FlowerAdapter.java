@@ -13,18 +13,20 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.flowershop.R;
 import com.example.flowershop.activities.ProductDetailActivity;
 import com.example.flowershop.model.SupabaseFlower;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerViewHolder> {
 
     private List<SupabaseFlower> flowers = new ArrayList<>();
+    private Set<Integer> favoriteFlowerIds = new HashSet<>();
     private OnAddToCartListener listener;
     private int layoutResId = R.layout.item_flower;
 
@@ -46,6 +48,11 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
         notifyDataSetChanged();
     }
 
+    public void setFavoriteFlowerIds(List<Integer> ids) {
+        this.favoriteFlowerIds = new HashSet<>(ids);
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public FlowerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -58,7 +65,7 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
     public void onBindViewHolder(@NonNull FlowerViewHolder holder, int position) {
         SupabaseFlower flower = flowers.get(position);
         holder.bind(flower);
-
+        
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(v.getContext(), ProductDetailActivity.class);
             intent.putExtra("flower", flower);
@@ -72,29 +79,18 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
     }
 
     class FlowerViewHolder extends RecyclerView.ViewHolder {
-        private ImageView ivFlower;
+        private ImageView ivFlower, ivFavorite;
         private TextView tvFlowerName, tvCategory, tvPrice;
         private Button btnAddToCart;
 
         FlowerViewHolder(View itemView) {
             super(itemView);
             ivFlower = itemView.findViewById(R.id.ivFlower);
+            ivFavorite = itemView.findViewById(R.id.ivFavorite);
             tvFlowerName = itemView.findViewById(R.id.tvFlowerName);
             tvCategory = itemView.findViewById(R.id.tvCategory);
             tvPrice = itemView.findViewById(R.id.tvPrice);
             btnAddToCart = itemView.findViewById(R.id.btnAddToCart);
-        }
-
-        // HÀM MỚI: Tách logic load ảnh default ra cho gọn
-        private void loadDefaultImage(Context context) {
-            try {
-                InputStream isDefault = context.getAssets().open("flower_image/default.png");
-                Drawable dDefault = Drawable.createFromStream(isDefault, null);
-                ivFlower.setImageDrawable(dDefault);
-                isDefault.close();
-            } catch (Exception ex) {
-                ivFlower.setImageResource(android.R.drawable.ic_menu_report_image);
-            }
         }
 
         void bind(SupabaseFlower flower) {
@@ -103,31 +99,34 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
             tvCategory.setText(flower.category);
             tvPrice.setText(String.format("%.0f VND", flower.price));
 
-            if (ivFlower != null) {
-                if (flower.imageResource != null && !flower.imageResource.isEmpty()) {
-                    // Logic Glide cho ảnh upload từ điện thoại
-                    if (flower.imageResource.contains("/") || flower.imageResource.startsWith("content://") || flower.imageResource.startsWith("http")) {
-                        Glide.with(context)
-                                .load(flower.imageResource)
-                                .placeholder(android.R.drawable.ic_menu_gallery)
-                                .error(android.R.drawable.ic_menu_gallery)
-                                .into(ivFlower);
-                    } else {
-                        // Logic lấy ảnh cũ trong assets
-                        try {
-                            String path = "flower_image/" + flower.imageResource + ".png";
-                            InputStream is = context.getAssets().open(path);
-                            Drawable d = Drawable.createFromStream(is, null);
-                            ivFlower.setImageDrawable(d);
-                            is.close();
-                        } catch (Exception e) {
-                            // KHÔI PHỤC: Lỗi sai tên ảnh thì lấy default.png
-                            loadDefaultImage(context);
-                        }
-                    }
+            if (ivFavorite != null) {
+                if (favoriteFlowerIds.contains(flower.id)) {
+                    ivFavorite.setVisibility(View.VISIBLE);
                 } else {
-                    // KHÔI PHỤC: Không có tên ảnh thì lấy default.png
-                    loadDefaultImage(context);
+                    ivFavorite.setVisibility(View.GONE);
+                }
+            }
+
+            if (ivFlower != null) {
+                try {
+                    String imageName = (flower.imageResource != null) ? flower.imageResource.trim() : "default";
+                    if (!imageName.toLowerCase().endsWith(".png")) {
+                        imageName += ".png";
+                    }
+                    String path = "flower_image/" + imageName;
+                    InputStream is = context.getAssets().open(path);
+                    Drawable d = Drawable.createFromStream(is, null);
+                    ivFlower.setImageDrawable(d);
+                    is.close();
+                } catch (Exception e) {
+                    try {
+                        InputStream isDefault = context.getAssets().open("flower_image/default.png");
+                        Drawable dDefault = Drawable.createFromStream(isDefault, null);
+                        ivFlower.setImageDrawable(dDefault);
+                        isDefault.close();
+                    } catch (Exception ex) {
+                        ivFlower.setImageResource(android.R.drawable.ic_menu_report_image);
+                    }
                 }
             }
 

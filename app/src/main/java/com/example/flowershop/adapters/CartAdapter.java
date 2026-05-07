@@ -13,7 +13,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.flowershop.R;
 import com.example.flowershop.model.CartItem;
 import com.example.flowershop.model.SupabaseFlower;
@@ -72,29 +71,15 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             holder.tvPrice.setText(String.format("%,.0f VND", flower.price));
 
             if (flower.imageResource != null && !flower.imageResource.isEmpty()) {
-                // ĐÃ SỬA: Thêm điều kiện .contains("/") để nhận diện đường dẫn ảnh nội bộ của App
-                if (flower.imageResource.contains("/") ||
-                        flower.imageResource.startsWith("content://") ||
-                        flower.imageResource.startsWith("http")) {
-
-                    Glide.with(context)
-                            .load(flower.imageResource)
-                            .placeholder(android.R.drawable.ic_menu_gallery)
-                            .error(android.R.drawable.ic_menu_gallery)
-                            .into(holder.ivImage);
-                } else {
-                    try {
-                        String imagePath = "flower_image/" + flower.imageResource + ".png";
-                        InputStream is = context.getAssets().open(imagePath);
-                        Drawable d = Drawable.createFromStream(is, null);
-                        holder.ivImage.setImageDrawable(d);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        holder.ivImage.setImageResource(android.R.drawable.ic_menu_gallery);
-                    }
+                try {
+                    String imagePath = "flower_image/" + flower.imageResource + ".png";
+                    InputStream is = context.getAssets().open(imagePath);
+                    Drawable d = Drawable.createFromStream(is, null);
+                    holder.ivImage.setImageDrawable(d);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    holder.ivImage.setImageResource(android.R.drawable.ic_menu_gallery);
                 }
-            } else {
-                holder.ivImage.setImageResource(android.R.drawable.ic_menu_gallery);
             }
         }
 
