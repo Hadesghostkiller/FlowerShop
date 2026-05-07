@@ -85,6 +85,18 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
             btnAddToCart = itemView.findViewById(R.id.btnAddToCart);
         }
 
+        // HÀM MỚI: Tách logic load ảnh default ra cho gọn
+        private void loadDefaultImage(Context context) {
+            try {
+                InputStream isDefault = context.getAssets().open("flower_image/default.png");
+                Drawable dDefault = Drawable.createFromStream(isDefault, null);
+                ivFlower.setImageDrawable(dDefault);
+                isDefault.close();
+            } catch (Exception ex) {
+                ivFlower.setImageResource(android.R.drawable.ic_menu_report_image);
+            }
+        }
+
         void bind(SupabaseFlower flower) {
             Context context = itemView.getContext();
             tvFlowerName.setText(flower.flowerName);
@@ -93,14 +105,15 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
 
             if (ivFlower != null) {
                 if (flower.imageResource != null && !flower.imageResource.isEmpty()) {
-                    // ĐÃ SỬA: Nhận diện đường dẫn nội bộ (chứa dấu "/")
-                    if (flower.imageResource.contains("/") || flower.imageResource.startsWith("content://")) {
+                    // Logic Glide cho ảnh upload từ điện thoại
+                    if (flower.imageResource.contains("/") || flower.imageResource.startsWith("content://") || flower.imageResource.startsWith("http")) {
                         Glide.with(context)
                                 .load(flower.imageResource)
                                 .placeholder(android.R.drawable.ic_menu_gallery)
                                 .error(android.R.drawable.ic_menu_gallery)
                                 .into(ivFlower);
                     } else {
+                        // Logic lấy ảnh cũ trong assets
                         try {
                             String path = "flower_image/" + flower.imageResource + ".png";
                             InputStream is = context.getAssets().open(path);
@@ -108,11 +121,13 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
                             ivFlower.setImageDrawable(d);
                             is.close();
                         } catch (Exception e) {
-                            ivFlower.setImageResource(android.R.drawable.ic_menu_report_image);
+                            // KHÔI PHỤC: Lỗi sai tên ảnh thì lấy default.png
+                            loadDefaultImage(context);
                         }
                     }
                 } else {
-                    ivFlower.setImageResource(android.R.drawable.ic_menu_report_image);
+                    // KHÔI PHỤC: Không có tên ảnh thì lấy default.png
+                    loadDefaultImage(context);
                 }
             }
 
