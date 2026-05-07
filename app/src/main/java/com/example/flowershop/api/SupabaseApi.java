@@ -2,13 +2,12 @@ package com.example.flowershop.api;
 
 import com.example.flowershop.model.Banner;
 import com.example.flowershop.model.Category;
+import com.example.flowershop.model.FavoriteItem;
 import com.example.flowershop.model.SupabaseFlower;
 import com.example.flowershop.model.CartItem;
 
 import java.util.List;
 import java.util.Map;
-
-// CÁC THƯ VIỆN BẮT BUỘC ĐỂ GỌI MẠNG (Đừng xóa các dòng này)
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -52,16 +51,16 @@ public interface SupabaseApi {
             @Query(value = "flower_id", encoded = true) String flowerIdEq
     );
 
-    // ==========================================
-    // CÁC API DÀNH CHO ADMIN (QUẢN LÝ SẢN PHẨM)
-    // ==========================================
+    // Favorite APIs
+    @GET("rest/v1/favorite?select=*,flowers(*)")
+    Call<List<FavoriteItem>> getFavoritesByUserId(@Query(value = "user_id", encoded = true) String userIdEq);
 
-    @POST("rest/v1/flowers")
-    Call<Void> addFlower(@Body Map<String, Object> flowerData);
+    @POST("rest/v1/favorite")
+    Call<Void> addToFavorite(@Body Map<String, Object> favoriteData);
 
-    @PATCH("rest/v1/flowers")
-    Call<Void> updateFlower(@Query(value = "id", encoded = true) String idEq, @Body Map<String, Object> flowerData);
-
-    @DELETE("rest/v1/flowers")
-    Call<Void> deleteFlower(@Query(value = "id", encoded = true) String idEq);
+    @DELETE("rest/v1/favorite")
+    Call<Void> deleteFavoriteItem(
+            @Query(value = "user_id", encoded = true) String userIdEq,
+            @Query(value = "flower_id", encoded = true) String flowerIdEq
+    );
 }
