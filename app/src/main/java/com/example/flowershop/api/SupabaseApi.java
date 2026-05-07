@@ -63,4 +63,17 @@ public interface SupabaseApi {
             @Query(value = "user_id", encoded = true) String userIdEq,
             @Query(value = "flower_id", encoded = true) String flowerIdEq
     );
+
+    // Flower Management APIs
+    @POST("rest/v1/flowers")
+    Call<Void> addFlower(@Body Map<String, Object> flowerData);
+
+    @PATCH("rest/v1/flowers")
+    Call<Void> updateFlower(
+            @Query(value = "id", encoded = true) String idEq,
+            @Body Map<String, Object> flowerData
+    );
+
+    @DELETE("rest/v1/flowers")
+    Call<Void> deleteFlower(@Query(value = "id", encoded = true) String idEq);
 }
