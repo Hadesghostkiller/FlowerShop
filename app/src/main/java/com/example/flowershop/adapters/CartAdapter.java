@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -24,16 +25,24 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     private Context context;
     private List<CartItem> cartItemList;
     private OnCartItemDeleteListener deleteListener;
+    private OnCartItemCheckListener checkListener; // THÊM MỚI: Lắng nghe sự kiện tick
 
-    // Interface để báo cho Activity biết khi người dùng bấm xóa
     public interface OnCartItemDeleteListener {
         void onDeleteClick(CartItem item);
     }
 
-    public CartAdapter(Context context, List<CartItem> cartItemList, OnCartItemDeleteListener listener) {
+    // THÊM MỚI: Interface cho sự kiện tick checkbox
+    public interface OnCartItemCheckListener {
+        void onItemCheckChanged(CartItem item, boolean isChecked);
+    }
+
+    public CartAdapter(Context context, List<CartItem> cartItemList,
+                       OnCartItemDeleteListener deleteListener,
+                       OnCartItemCheckListener checkListener) {
         this.context = context;
         this.cartItemList = cartItemList;
-        this.deleteListener = listener;
+        this.deleteListener = deleteListener;
+        this.checkListener = checkListener;
     }
 
     @NonNull
@@ -48,14 +57,18 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         CartItem cartItem = cartItemList.get(position);
         SupabaseFlower flower = cartItem.getFlowers();
 
+        // 1. Gỡ bỏ listener cũ trước khi set state để tránh vòng lặp vô hạn
+        holder.cbItem.setOnCheckedChangeListener(null);
+
+        // 2. Set trạng thái checkbox hiện tại
+        holder.cbItem.setChecked(cartItem.isSelected());
+
         if (flower != null) {
             holder.tvName.setText(flower.flowerName != null ? flower.flowerName : "Hoa chưa rõ tên");
             holder.tvPrice.setText(String.format("%,.0f VND", flower.price));
 
-            // Load ảnh từ thư mục assets/flower_image/
             if (flower.imageResource != null && !flower.imageResource.isEmpty()) {
                 try {
-                    // Tương tự ở đây cũng sửa thành imageResource
                     String imagePath = "flower_image/" + flower.imageResource + ".png";
                     InputStream is = context.getAssets().open(imagePath);
                     Drawable d = Drawable.createFromStream(is, null);
@@ -65,12 +78,19 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                     holder.ivImage.setImageResource(android.R.drawable.ic_menu_gallery);
                 }
             }
-
         }
 
         holder.tvQuantity.setText("x" + cartItem.getQuantity());
 
-        // Bắt sự kiện bấm nút Xóa
+        // 3. Gắn lại sự kiện khi người dùng click vào Checkbox
+        holder.cbItem.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            cartItem.setSelected(isChecked); // Cập nhật model
+            if (checkListener != null) {
+                checkListener.onItemCheckChanged(cartItem, isChecked);
+            }
+        });
+
+        // Sự kiện xóa
         holder.btnDelete.setOnClickListener(v -> {
             if (deleteListener != null) {
                 deleteListener.onDeleteClick(cartItem);
@@ -84,12 +104,14 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     }
 
     public static class CartViewHolder extends RecyclerView.ViewHolder {
+        CheckBox cbItem; // Khai báo Checkbox
         ImageView ivImage;
         TextView tvName, tvPrice, tvQuantity;
         ImageButton btnDelete;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
+            cbItem = itemView.findViewById(R.id.cbItemCart); // Ánh xạ
             ivImage = itemView.findViewById(R.id.ivCartImage);
             tvName = itemView.findViewById(R.id.tvCartName);
             tvPrice = itemView.findViewById(R.id.tvCartPrice);

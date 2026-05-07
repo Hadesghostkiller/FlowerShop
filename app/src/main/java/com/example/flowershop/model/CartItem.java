@@ -1,15 +1,14 @@
 package com.example.flowershop.model;
 
-import com.example.flowershop.model.SupabaseFlower;
-
 public class CartItem {
     private int id;
     private String user_id;
     private int flower_id;
     private int quantity;
-
-    // Khai báo biến có tên TRÙNG VỚI TÊN BẢNG (flowers) để hứng dữ liệu JOIN từ Supabase
     private SupabaseFlower flowers;
+
+    // Biến để lưu trạng thái tick chọn (mặc định là true - đã chọn)
+    private boolean isSelected = true;
 
     public CartItem() {
     }
@@ -28,4 +27,8 @@ public class CartItem {
 
     public SupabaseFlower getFlowers() { return flowers; }
     public void setFlowers(SupabaseFlower flowers) { this.flowers = flowers; }
+
+    // GETTER VÀ SETTER MỚI (Lỗi của bạn nằm ở đây)
+    public boolean isSelected() { return isSelected; }
+    public void setSelected(boolean selected) { isSelected = selected; }
 }
