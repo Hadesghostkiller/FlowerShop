@@ -60,7 +60,7 @@ public class CategoryActivity extends AppCompatActivity {
 
         // Thiết kế dạng lưới 2 cột
         rvProducts.setLayoutManager(new GridLayoutManager(this, 2));
-
+        
         // Sử dụng item_flower_grid để hiển thị đẹp hơn trong GridView
         flowerAdapter = new FlowerAdapter(this::addToCartToSupabase, R.layout.item_flower_grid);
         rvProducts.setAdapter(flowerAdapter);
