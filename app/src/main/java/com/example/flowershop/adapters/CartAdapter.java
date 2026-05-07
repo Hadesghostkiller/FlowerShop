@@ -25,24 +25,30 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     private Context context;
     private List<CartItem> cartItemList;
     private OnCartItemDeleteListener deleteListener;
-    private OnCartItemCheckListener checkListener; // THÊM MỚI: Lắng nghe sự kiện tick
+    private OnCartItemCheckListener checkListener;
+    private OnQuantityChangeListener quantityListener;
 
     public interface OnCartItemDeleteListener {
         void onDeleteClick(CartItem item);
     }
 
-    // THÊM MỚI: Interface cho sự kiện tick checkbox
     public interface OnCartItemCheckListener {
         void onItemCheckChanged(CartItem item, boolean isChecked);
     }
 
+    public interface OnQuantityChangeListener {
+        void onQuantityChanged(CartItem item, int newQuantity);
+    }
+
     public CartAdapter(Context context, List<CartItem> cartItemList,
                        OnCartItemDeleteListener deleteListener,
-                       OnCartItemCheckListener checkListener) {
+                       OnCartItemCheckListener checkListener,
+                       OnQuantityChangeListener quantityListener) {
         this.context = context;
         this.cartItemList = cartItemList;
         this.deleteListener = deleteListener;
         this.checkListener = checkListener;
+        this.quantityListener = quantityListener;
     }
 
     @NonNull
@@ -57,10 +63,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         CartItem cartItem = cartItemList.get(position);
         SupabaseFlower flower = cartItem.getFlowers();
 
-        // 1. Gỡ bỏ listener cũ trước khi set state để tránh vòng lặp vô hạn
         holder.cbItem.setOnCheckedChangeListener(null);
-
-        // 2. Set trạng thái checkbox hiện tại
         holder.cbItem.setChecked(cartItem.isSelected());
 
         if (flower != null) {
@@ -80,17 +83,30 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             }
         }
 
-        holder.tvQuantity.setText("x" + cartItem.getQuantity());
+        holder.tvQuantity.setText(String.valueOf(cartItem.getQuantity()));
 
-        // 3. Gắn lại sự kiện khi người dùng click vào Checkbox
         holder.cbItem.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            cartItem.setSelected(isChecked); // Cập nhật model
+            cartItem.setSelected(isChecked);
             if (checkListener != null) {
                 checkListener.onItemCheckChanged(cartItem, isChecked);
             }
         });
 
-        // Sự kiện xóa
+        holder.btnMinus.setOnClickListener(v -> {
+            int currentQty = cartItem.getQuantity();
+            if (currentQty > 1) {
+                if (quantityListener != null) {
+                    quantityListener.onQuantityChanged(cartItem, currentQty - 1);
+                }
+            }
+        });
+
+        holder.btnAdd.setOnClickListener(v -> {
+            if (quantityListener != null) {
+                quantityListener.onQuantityChanged(cartItem, cartItem.getQuantity() + 1);
+            }
+        });
+
         holder.btnDelete.setOnClickListener(v -> {
             if (deleteListener != null) {
                 deleteListener.onDeleteClick(cartItem);
@@ -104,19 +120,21 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     }
 
     public static class CartViewHolder extends RecyclerView.ViewHolder {
-        CheckBox cbItem; // Khai báo Checkbox
+        CheckBox cbItem;
         ImageView ivImage;
         TextView tvName, tvPrice, tvQuantity;
-        ImageButton btnDelete;
+        ImageButton btnDelete, btnMinus, btnAdd;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
-            cbItem = itemView.findViewById(R.id.cbItemCart); // Ánh xạ
+            cbItem = itemView.findViewById(R.id.cbItemCart);
             ivImage = itemView.findViewById(R.id.ivCartImage);
             tvName = itemView.findViewById(R.id.tvCartName);
             tvPrice = itemView.findViewById(R.id.tvCartPrice);
             tvQuantity = itemView.findViewById(R.id.tvCartQuantity);
             btnDelete = itemView.findViewById(R.id.btnDeleteCartItem);
+            btnMinus = itemView.findViewById(R.id.btnMinusCart);
+            btnAdd = itemView.findViewById(R.id.btnAddCart);
         }
     }
 }

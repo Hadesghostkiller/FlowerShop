@@ -13,9 +13,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 import com.example.flowershop.R;
 import com.example.flowershop.adapters.BannerAdapter;
+import com.example.flowershop.adapters.CategoryAdapter;
 import com.example.flowershop.adapters.FlowerAdapter;
 import com.example.flowershop.api.SupabaseClient;
 import com.example.flowershop.model.Banner;
+import com.example.flowershop.model.Category;
 import com.example.flowershop.model.SupabaseFlower;
 import com.example.flowershop.sync.SupabaseSync;
 import com.google.android.material.tabs.TabLayout;
@@ -34,7 +36,8 @@ import retrofit2.Response;
 public class MenuActivity extends AppCompatActivity {
     private ViewPager2 viewPagerBanner;
     private TabLayout tabDots;
-    private RecyclerView rvBestSeller;
+    private RecyclerView rvCategory, rvBestSeller;
+    private CategoryAdapter categoryAdapter;
     private FlowerAdapter bestSellerAdapter;
     private FirebaseAuth mAuth;
     private AutoCompleteTextView autoCompleteSearch;
@@ -47,12 +50,14 @@ public class MenuActivity extends AppCompatActivity {
         initViews();
         setupBottomNavigation();
         loadBanners();
+        loadCategories();
         loadBestSellers();
     }
 
     private void initViews() {
         viewPagerBanner = findViewById(R.id.viewPagerBanner);
         tabDots = findViewById(R.id.tabDots);
+        rvCategory = findViewById(R.id.rvCategory);
         rvBestSeller = findViewById(R.id.rvBestSeller);
         autoCompleteSearch = findViewById(R.id.autoCompleteSearch);
 
@@ -92,8 +97,32 @@ public class MenuActivity extends AppCompatActivity {
         });
     }
 
+    private void loadCategories() {
+        categoryAdapter = new CategoryAdapter(category -> {
+            Intent intent = new Intent(this, CategoryActivity.class);
+            intent.putExtra("category_id", category.id);
+            intent.putExtra("category_name", category.name);
+            startActivity(intent);
+        });
+        rvCategory.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvCategory.setAdapter(categoryAdapter);
+
+        SupabaseClient.getApi().getCategories().enqueue(new Callback<List<Category>>() {
+            @Override
+            public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    categoryAdapter.setCategories(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Category>> call, Throwable t) {
+                Log.e("CATEGORY_ERROR", t.getMessage());
+            }
+        });
+    }
+
     private void loadBestSellers() {
-        // CẬP NHẬT: Thay vì gọi Toast, ta gọi hàm thêm vào giỏ hàng
         bestSellerAdapter = new FlowerAdapter(flower -> addToCartToSupabase(flower));
 
         rvBestSeller.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -114,7 +143,6 @@ public class MenuActivity extends AppCompatActivity {
         });
     }
 
-    // THÊM MỚI: Hàm xử lý thêm vào giỏ hàng Supabase
     private void addToCartToSupabase(SupabaseFlower flower) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) {
@@ -122,17 +150,11 @@ public class MenuActivity extends AppCompatActivity {
             return;
         }
 
-        //Toast.makeText(this, "Đang thêm " + flower.flowerName + "...", Toast.LENGTH_SHORT).show();
-
-        // Chuẩn bị dữ liệu JSON để gửi lên bảng 'cart' trên Supabase
         Map<String, Object> cartData = new HashMap<>();
         cartData.put("user_id", user.getUid());
-
-        // Lưu ý: Nếu id bị gạch chân báo lỗi do access modifier (private), hãy sửa thành flower.getId()
         cartData.put("flower_id", flower.id);
-        cartData.put("quantity", 1); // Mặc định mỗi lần bấm thêm 1 bông
+        cartData.put("quantity", 1);
 
-        // Gọi API Insert (Yêu cầu phải có hàm addToCart trong file SupabaseApi.java như đã làm ở trên)
         SupabaseClient.getApi().addToCart(cartData).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {

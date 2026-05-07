@@ -1,6 +1,7 @@
 package com.example.flowershop.api;
 
 import com.example.flowershop.model.Banner;
+import com.example.flowershop.model.Category;
 import com.example.flowershop.model.SupabaseFlower;
 import com.example.flowershop.model.CartItem;
 
@@ -10,6 +11,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
@@ -23,13 +25,25 @@ public interface SupabaseApi {
     @GET("rest/v1/banners?select=*")
     Call<List<Banner>> getBanners();
 
+    @GET("rest/v1/category?select=*")
+    Call<List<Category>> getCategories();
+
+    @GET("rest/v1/flowers?select=*")
+    Call<List<SupabaseFlower>> getFlowersByCategory(@Query("category_id") String categoryIdEq);
+
     @GET("rest/v1/cart?select=*,flowers(*)")
     Call<List<CartItem>> getCartByUserId(@Query(value = "user_id", encoded = true) String userIdEq);
 
     @POST("rest/v1/cart")
     Call<Void> addToCart(@Body Map<String, Object> cartData);
 
-    // THÊM MỚI: Hàm xóa một loại hoa khỏi giỏ hàng của User
+    @PATCH("rest/v1/cart")
+    Call<Void> updateCartQuantity(
+            @Query(value = "user_id", encoded = true) String userIdEq,
+            @Query(value = "flower_id", encoded = true) String flowerIdEq,
+            @Body Map<String, Object> updates
+    );
+
     @DELETE("rest/v1/cart")
     Call<Void> deleteCartItem(
             @Query(value = "user_id", encoded = true) String userIdEq,
