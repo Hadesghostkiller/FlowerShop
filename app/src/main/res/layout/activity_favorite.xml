@@ -84,7 +84,8 @@
             android:orientation="horizontal"
             android:gravity="center"
             android:weightSum="4"
-            android:baselineAligned="false">
+            android:baselineAligned="false"
+            android:paddingHorizontal="5dp">
 
             <LinearLayout
                 android:id="@+id/navWishlistContainer"
