@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,19 +51,12 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Hiển thị tràn viền (Edge-to-Edge)
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_login);
 
-        // 1. Khởi tạo Firebase & Social Login
         mAuth = FirebaseAuth.getInstance();
         setupSocialLogins();
-
-        // 2. Ánh xạ View
         initViews();
-
-        // 3. Chạy Animation khởi động
         setupStartupAnimations();
     }
 
@@ -88,140 +80,26 @@ public class LoginActivity extends AppCompatActivity {
         findViewById(R.id.btnLogin).setOnClickListener(this::performLoginWithAnimation);
         findViewById(R.id.btnRegister).setOnClickListener(v -> startActivity(new Intent(this, SignupActivity.class)));
 
-        // THAY ĐỔI TẠI ĐÂY: Chuyển sang Activity Quên mật khẩu mới
         if (tvForgotPassword != null) {
-            tvForgotPassword.setOnClickListener(v -> {
-                Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
-                startActivity(intent);
-            });
-        }
-
-        setupSocialButtons();
-    }
-
-    private void setupSocialButtons() {
-        ImageView btnGoogle = findViewById(R.id.btnGoogleLogin);
-        ImageView btnFB = findViewById(R.id.btnFacebookLogin);
-        ImageView btnX = findViewById(R.id.btnXLogin);
-
-        if (btnGoogle != null) btnGoogle.setOnClickListener(v -> handleSocialClick(v, this::signInWithGoogle));
-        if (btnFB != null) btnFB.setOnClickListener(v -> handleSocialClick(v, this::signInWithFacebook));
-        if (btnX != null) btnX.setOnClickListener(v -> handleSocialClick(v, this::signInWithX));
-    }
-
-    private void handleSocialClick(View v, Runnable action) {
-        v.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100).withEndAction(() -> {
-            v.animate().scaleX(1f).scaleY(1f).setDuration(100);
-            action.run();
-        });
-    }
-
-    // --- LOGIC SOCIAL LOGIN (GIỮ NGUYÊN) ---
-
-    private void signInWithX() {
-        showLoading(true);
-        OAuthProvider.Builder provider = OAuthProvider.newBuilder("twitter.com");
-
-        mAuth.startActivityForSignInWithProvider(this, provider.build())
-                .addOnSuccessListener(authResult -> {
-                    showLoading(false);
-                    navigateToMenu(mAuth.getCurrentUser());
-                })
-                .addOnFailureListener(e -> {
-                    showLoading(false);
-                    Toast.makeText(this, "Lỗi X: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
-    }
-
-    private void signInWithFacebook() {
-        LoginManager.getInstance().logInWithReadPermissions(this, mCallbackManager, Arrays.asList("email", "public_profile"));
-        LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                handleFacebookAccessToken(loginResult.getAccessToken());
-            }
-            @Override public void onCancel() { }
-            @Override public void onError(FacebookException error) {
-                Toast.makeText(LoginActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void handleFacebookAccessToken(AccessToken token) {
-        showLoading(true);
-        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
-        mAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
-            showLoading(false);
-            if (task.isSuccessful()) navigateToMenu(mAuth.getCurrentUser());
-        });
-    }
-
-    private void signInWithGoogle() {
-        startActivityForResult(mGoogleSignInClient.getSignInIntent(), RC_SIGN_IN);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        mCallbackManager.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_SIGN_IN) {
-            showLoading(true);
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                if (account != null) firebaseAuthWithGoogle(account.getIdToken());
-            } catch (ApiException e) {
-                showLoading(false);
-            }
+            tvForgotPassword.setOnClickListener(v -> startActivity(new Intent(this, ForgotPasswordActivity.class)));
         }
     }
 
-    private void firebaseAuthWithGoogle(String idToken) {
-        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
-        mAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
-            showLoading(false);
-            if (task.isSuccessful()) navigateToMenu(mAuth.getCurrentUser());
-        });
-    }
-
-    private void navigateToMenu(FirebaseUser user) {
+    private void navigateToNextScreen(FirebaseUser user) {
         if (user != null) {
-            Intent intent = new Intent(this, MenuActivity.class);
-            intent.putExtra("username", user.getEmail());
-            intent.putExtra("fullname", user.getDisplayName());
+            Intent intent;
+            // KIỂM TRA QUYỀN ADMIN: Nếu là admin@gmail.com thì vào thẳng Dashboard
+            if ("admin@gmail.com".equals(user.getEmail())) {
+                Toast.makeText(this, "Chào mừng Admin!", Toast.LENGTH_SHORT).show();
+                intent = new Intent(this, AdminDashboardActivity.class);
+            } else {
+                intent = new Intent(this, MenuActivity.class);
+                intent.putExtra("username", user.getEmail());
+                intent.putExtra("fullname", user.getDisplayName());
+            }
             startActivity(intent);
             finish();
         }
-    }
-
-    private void showLoading(boolean isShow) {
-        if (loadingOverlay != null) loadingOverlay.setVisibility(isShow ? View.VISIBLE : View.GONE);
-    }
-
-    // --- ANIMATIONS & LOGIN LOGIC (GIỮ NGUYÊN) ---
-
-    private void setupStartupAnimations() {
-        View lottie = findViewById(R.id.lottieTop);
-        View welcome = findViewById(R.id.tvWelcome);
-        View card = findViewById(R.id.cardLayout);
-        Button btnLogin = findViewById(R.id.btnLogin);
-
-        if (lottie != null) lottie.setAlpha(0f);
-        if (welcome != null) { welcome.setAlpha(0f); welcome.setTranslationY(-50f); }
-        if (card != null) { card.setAlpha(0f); card.setTranslationY(100f); }
-        if (btnLogin != null) { btnLogin.setAlpha(0f); btnLogin.setScaleX(0.8f); btnLogin.setScaleY(0.8f); }
-
-        if (lottie != null) lottie.animate().alpha(1f).setDuration(600).start();
-        if (welcome != null) welcome.animate().alpha(1f).translationY(0f).setStartDelay(300).setDuration(500).start();
-        if (card != null) card.animate().alpha(1f).translationY(0f).setStartDelay(600).setDuration(500).start();
-        if (btnLogin != null) btnLogin.animate().alpha(1f).scaleX(1f).scaleY(1f).setStartDelay(900).setDuration(400).start();
-    }
-
-    private void performLoginWithAnimation(View v) {
-        v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).withEndAction(() -> {
-            v.animate().scaleX(1f).scaleY(1f).setDuration(100);
-            login();
-        });
     }
 
     private void login() {
@@ -241,11 +119,56 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     showLoading(false);
                     if (task.isSuccessful()) {
-                        navigateToMenu(mAuth.getCurrentUser());
+                        navigateToNextScreen(mAuth.getCurrentUser());
                     } else {
                         tvError.setText("Gmail hoặc mật khẩu không chính xác!");
                         tvError.setVisibility(View.VISIBLE);
                     }
                 });
+    }
+
+    private void showLoading(boolean isShow) {
+        if (loadingOverlay != null) loadingOverlay.setVisibility(isShow ? View.VISIBLE : View.GONE);
+    }
+
+    private void performLoginWithAnimation(View v) {
+        v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).withEndAction(() -> {
+            v.animate().scaleX(1f).scaleY(1f).setDuration(100);
+            login();
+        });
+    }
+
+    private void setupStartupAnimations() {
+        View lottie = findViewById(R.id.lottieTop);
+        View welcome = findViewById(R.id.tvWelcome);
+        View card = findViewById(R.id.cardLayout);
+        Button btnLogin = findViewById(R.id.btnLogin);
+
+        if (lottie != null) lottie.setAlpha(0f);
+        if (welcome != null) { welcome.setAlpha(0f); welcome.setTranslationY(-50f); }
+        if (card != null) { card.setAlpha(0f); card.setTranslationY(100f); }
+        if (btnLogin != null) { btnLogin.setAlpha(0f); btnLogin.setScaleX(0.8f); btnLogin.setScaleY(0.8f); }
+
+        if (lottie != null) lottie.animate().alpha(1f).setDuration(600).start();
+        if (welcome != null) welcome.animate().alpha(1f).translationY(0f).setStartDelay(300).setDuration(500).start();
+        if (card != null) card.animate().alpha(1f).translationY(0f).setStartDelay(600).setDuration(500).start();
+        if (btnLogin != null) btnLogin.animate().alpha(1f).scaleX(1f).scaleY(1f).setStartDelay(900).setDuration(400).start();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                if (account != null) {
+                    AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+                    mAuth.signInWithCredential(credential).addOnCompleteListener(this, t -> {
+                        if (t.isSuccessful()) navigateToNextScreen(mAuth.getCurrentUser());
+                    });
+                }
+            } catch (ApiException ignored) {}
+        }
     }
 }
