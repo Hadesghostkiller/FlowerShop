@@ -1,7 +1,5 @@
 package com.example.flowershop.api;
 
-import java.util.concurrent.TimeUnit;
-
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -16,22 +14,14 @@ public class SupabaseClient {
     public static Retrofit getClient() {
         if (retrofit == null) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            // In log ra màn hình Logcat để dễ debug
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             OkHttpClient client = new OkHttpClient.Builder()
-                    // Thêm Timeout để tránh treo app khi mạng yếu
-                    .connectTimeout(30, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS)
                     .addInterceptor(chain -> {
                         okhttp3.Request original = chain.request();
                         okhttp3.Request.Builder requestBuilder = original.newBuilder()
                                 .header("apikey", ANON_KEY)
                                 .header("Authorization", "Bearer " + ANON_KEY)
-                                .header("Content-Type", "application/json") // Chuẩn hóa kiểu dữ liệu gửi đi
-                                .header("Accept", "application/json") // Chuẩn hóa kiểu dữ liệu nhận về
-                                // RẤT QUAN TRỌNG: Giúp các lệnh POST/PATCH trả về Call<Void> không bị lỗi văng App
-                                .header("Prefer", "return=minimal")
                                 .method(original.method(), original.body());
                         return chain.proceed(requestBuilder.build());
                     })
