@@ -29,6 +29,7 @@
                 android:src="@android:drawable/ic_menu_revert"
                 app:tint="#000000" />
 
+            <!-- Đã trả lại ic_edit của bạn -->
             <ImageView
                 android:id="@+id/btnEditProfile"
                 android:layout_width="24dp"
@@ -128,6 +129,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
+                <!-- Đã trả lại ic_phone của bạn -->
                 <ImageView
                     android:layout_width="18dp"
                     android:layout_height="18dp"
@@ -149,6 +151,7 @@
                 android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
+                <!-- Đã trả lại ic_email của bạn -->
                 <ImageView
                     android:layout_width="18dp"
                     android:layout_height="18dp"
@@ -165,77 +168,13 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 4. KHUNG THỐNG KÊ -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="24dp"
             android:background="#33000000" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingVertical="16dp">
-                <TextView
-                    android:id="@+id/tvOrdersBought"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0"
-                    android:textColor="#1E293B"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Đơn đã mua"
-                    android:textColor="#475569"
-                    android:textSize="13sp" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:background="#33000000" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingVertical="16dp">
-                <TextView
-                    android:id="@+id/tvOrdersSold"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0"
-                    android:textColor="#1E293B"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Đơn đã bán"
-                    android:textColor="#475569"
-                    android:textSize="13sp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#33000000" />
-
-        <!-- 5. DANH SÁCH MENU -->
+        <!-- 4. DANH SÁCH MENU -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -243,6 +182,7 @@
             android:orientation="vertical"
             android:paddingBottom="30dp">
 
+            <!-- Nút mở trang Admin -->
             <LinearLayout
                 android:id="@+id/menuProducts"
                 android:layout_width="match_parent"
@@ -256,14 +196,14 @@
                 <ImageView
                     android:layout_width="22dp"
                     android:layout_height="22dp"
-                    android:src="@android:drawable/ic_menu_agenda"
+                    android:src="@drawable/shop"
                     app:tint="#000000" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
-                    android:text="Sản phẩm của tôi"
-                    android:textColor="#1E293B"
+                    android:text="Quản lý cửa hàng"
+                    android:textColor="#000000"
                     android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -288,31 +228,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
                     android:text="Hoa yêu thích"
-                    android:textColor="#1E293B"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/menuTotalMoney"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="24dp"
-                android:paddingVertical="16dp">
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@android:drawable/ic_menu_view"
-                    app:tint="#000000" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:text="Tổng doanh thu"
                     android:textColor="#1E293B"
                     android:textSize="15sp"
                     android:textStyle="bold" />

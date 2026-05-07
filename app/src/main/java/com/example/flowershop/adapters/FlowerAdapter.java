@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.flowershop.R;
 import com.example.flowershop.activities.ProductDetailActivity;
 import com.example.flowershop.model.SupabaseFlower;
@@ -57,7 +58,7 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
     public void onBindViewHolder(@NonNull FlowerViewHolder holder, int position) {
         SupabaseFlower flower = flowers.get(position);
         holder.bind(flower);
-        
+
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(v.getContext(), ProductDetailActivity.class);
             intent.putExtra("flower", flower);
@@ -91,21 +92,27 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
             tvPrice.setText(String.format("%.0f VND", flower.price));
 
             if (ivFlower != null) {
-                try {
-                    String path = "flower_image/" + flower.imageResource + ".png";
-                    InputStream is = context.getAssets().open(path);
-                    Drawable d = Drawable.createFromStream(is, null);
-                    ivFlower.setImageDrawable(d);
-                    is.close();
-                } catch (Exception e) {
-                    try {
-                        InputStream isDefault = context.getAssets().open("flower_image/default.png");
-                        Drawable dDefault = Drawable.createFromStream(isDefault, null);
-                        ivFlower.setImageDrawable(dDefault);
-                        isDefault.close();
-                    } catch (Exception ex) {
-                        ivFlower.setImageResource(android.R.drawable.ic_menu_report_image);
+                if (flower.imageResource != null && !flower.imageResource.isEmpty()) {
+                    // ĐÃ SỬA: Nhận diện đường dẫn nội bộ (chứa dấu "/")
+                    if (flower.imageResource.contains("/") || flower.imageResource.startsWith("content://")) {
+                        Glide.with(context)
+                                .load(flower.imageResource)
+                                .placeholder(android.R.drawable.ic_menu_gallery)
+                                .error(android.R.drawable.ic_menu_gallery)
+                                .into(ivFlower);
+                    } else {
+                        try {
+                            String path = "flower_image/" + flower.imageResource + ".png";
+                            InputStream is = context.getAssets().open(path);
+                            Drawable d = Drawable.createFromStream(is, null);
+                            ivFlower.setImageDrawable(d);
+                            is.close();
+                        } catch (Exception e) {
+                            ivFlower.setImageResource(android.R.drawable.ic_menu_report_image);
+                        }
                     }
+                } else {
+                    ivFlower.setImageResource(android.R.drawable.ic_menu_report_image);
                 }
             }
 
