@@ -98,6 +98,9 @@
         <activity
             android:name=".activities.ProductDetailActivity"
             android:exported="false" />
+        <activity
+            android:name=".activities.CheckoutActivity"
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

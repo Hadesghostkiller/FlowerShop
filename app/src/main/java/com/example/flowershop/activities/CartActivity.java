@@ -1,5 +1,6 @@
 package com.example.flowershop.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -43,6 +44,7 @@ public class CartActivity extends AppCompatActivity {
     private String currentUserId;
     private FirebaseAuth mAuth;
     private boolean isProgrammaticChange = false;
+    private double totalPrice = 0; // Đã giữ lại từ nhánh vy để tính tiền
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +63,12 @@ public class CartActivity extends AppCompatActivity {
         }
 
         initViews();
+        loadCartData();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         loadCartData();
     }
 
@@ -116,6 +124,7 @@ public class CartActivity extends AppCompatActivity {
                             List<CartItem> rawList = response.body();
                             cartItemList.clear();
 
+                            // Logic gộp các sản phẩm trùng ID hoa
                             HashMap<Integer, CartItem> mergedMap = new HashMap<>();
                             for (CartItem item : rawList) {
                                 item.setSelected(true);
@@ -237,7 +246,7 @@ public class CartActivity extends AppCompatActivity {
     private void calculateTotal() {
         try {
             int totalItems = 0;
-            double totalPrice = 0;
+            totalPrice = 0;
 
             for (CartItem item : cartItemList) {
                 if (item.isSelected()) {
@@ -248,8 +257,13 @@ public class CartActivity extends AppCompatActivity {
                 }
             }
 
-            if (tvTotalItems != null) tvTotalItems.setText(String.valueOf(totalItems));
-            if (tvTotalPrice != null) tvTotalPrice.setText(String.format("%,.0f VND", totalPrice));
+            // Cập nhật giao diện an toàn (giữ logic của vy)
+            if (tvTotalItems != null) {
+                tvTotalItems.setText(String.valueOf(totalItems));
+            }
+            if (tvTotalPrice != null) {
+                tvTotalPrice.setText(String.format("%,.0f VND", totalPrice));
+            }
 
         } catch (Exception e) {
             Log.e("CART_CRASH", "Lỗi tính tổng: ", e);
@@ -275,6 +289,16 @@ public class CartActivity extends AppCompatActivity {
             return;
         }
 
-        Toast.makeText(this, "Chức năng thanh toán đang phát triển!", Toast.LENGTH_SHORT).show();
+        ArrayList<CartItem> selectedItems = new ArrayList<>();
+        for (CartItem item : cartItemList) {
+            if (item.isSelected()) {
+                selectedItems.add(item);
+            }
+        }
+
+        Intent intent = new Intent(this, CheckoutActivity.class);
+        intent.putExtra("totalAmount", totalPrice);
+        intent.putExtra("cartItems", selectedItems);
+        startActivity(intent);
     }
 }
