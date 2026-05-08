@@ -23,21 +23,18 @@ import com.example.flowershop.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ProfileActivity extends AppCompatActivity {
 
     private ImageView imgAvatar, btnBack, btnEditProfile;
     private CardView btnEditAvatar;
     private TextView tvFullName, tvEmail, tvPhone, tvDob;
-    private View menuLogout, menuSettings, menuRating; // Thêm menuRating
+    private View menuLogout, menuSettings, menuRating, menuFavorites, menuProducts, menuTotalMoney;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -102,7 +99,12 @@ public class ProfileActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         menuLogout = findViewById(R.id.menuLogout);
         menuSettings = findViewById(R.id.menuSettings);
-        menuRating = findViewById(R.id.menuRating); // Ánh xạ menuRating
+        menuRating = findViewById(R.id.menuRating);
+        menuFavorites = findViewById(R.id.menuFavorites);
+        
+        // Khai báo thêm các nút Admin
+        menuProducts = findViewById(R.id.menuProducts);
+        menuTotalMoney = findViewById(R.id.menuTotalMoney);
     }
 
     private void loadUser() {
@@ -111,6 +113,15 @@ public class ProfileActivity extends AppCompatActivity {
             tvEmail.setText(user.getEmail());
             if (user.getDisplayName() != null)
                 tvFullName.setText(user.getDisplayName());
+                
+            // Kiểm tra nếu là admin thì hiển thị các tính năng admin (Ví dụ: admin@gmail.com)
+            if (user.getEmail() != null && user.getEmail().equals("admin@gmail.com")) {
+                if (menuProducts != null) menuProducts.setVisibility(View.VISIBLE);
+                if (menuTotalMoney != null) menuTotalMoney.setVisibility(View.VISIBLE);
+            } else {
+                // Nếu không phải admin có thể ẩn đi
+                // if (menuProducts != null) menuProducts.setVisibility(View.GONE);
+            }
         }
 
         File localFile = new File(getFilesDir(), "avatar_" + userId + ".jpg");
@@ -158,10 +169,30 @@ public class ProfileActivity extends AppCompatActivity {
             startActivityForResult(intent, 100);
         });
 
-        // Xử lý mở màn hình Đánh giá
         if (menuRating != null) {
             menuRating.setOnClickListener(v -> {
                 Intent intent = new Intent(ProfileActivity.this, RatingActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        if (menuFavorites != null) {
+            menuFavorites.setOnClickListener(v -> {
+                startActivity(new Intent(ProfileActivity.this, FavoriteActivity.class));
+            });
+        }
+
+        // Sự kiện click để vào trang Admin Dashboard
+        if (menuProducts != null) {
+            menuProducts.setOnClickListener(v -> {
+                Intent intent = new Intent(ProfileActivity.this, AdminDashboardActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        if (menuTotalMoney != null) {
+            menuTotalMoney.setOnClickListener(v -> {
+                Intent intent = new Intent(ProfileActivity.this, AdminDashboardActivity.class);
                 startActivity(intent);
             });
         }

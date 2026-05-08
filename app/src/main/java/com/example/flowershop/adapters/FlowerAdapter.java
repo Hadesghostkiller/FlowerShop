@@ -19,11 +19,14 @@ import com.example.flowershop.model.SupabaseFlower;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerViewHolder> {
 
     private List<SupabaseFlower> flowers = new ArrayList<>();
+    private Set<Integer> favoriteFlowerIds = new HashSet<>();
     private OnAddToCartListener listener;
     private int layoutResId = R.layout.item_flower;
 
@@ -42,6 +45,11 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
 
     public void setFlowersFromSupabase(List<SupabaseFlower> flowers) {
         this.flowers = flowers;
+        notifyDataSetChanged();
+    }
+
+    public void setFavoriteFlowerIds(List<Integer> ids) {
+        this.favoriteFlowerIds = new HashSet<>(ids);
         notifyDataSetChanged();
     }
 
@@ -71,13 +79,14 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
     }
 
     class FlowerViewHolder extends RecyclerView.ViewHolder {
-        private ImageView ivFlower;
+        private ImageView ivFlower, ivFavorite;
         private TextView tvFlowerName, tvCategory, tvPrice;
         private Button btnAddToCart;
 
         FlowerViewHolder(View itemView) {
             super(itemView);
             ivFlower = itemView.findViewById(R.id.ivFlower);
+            ivFavorite = itemView.findViewById(R.id.ivFavorite);
             tvFlowerName = itemView.findViewById(R.id.tvFlowerName);
             tvCategory = itemView.findViewById(R.id.tvCategory);
             tvPrice = itemView.findViewById(R.id.tvPrice);
@@ -90,9 +99,21 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.FlowerView
             tvCategory.setText(flower.category);
             tvPrice.setText(String.format("%.0f VND", flower.price));
 
+            if (ivFavorite != null) {
+                if (favoriteFlowerIds.contains(flower.id)) {
+                    ivFavorite.setVisibility(View.VISIBLE);
+                } else {
+                    ivFavorite.setVisibility(View.GONE);
+                }
+            }
+
             if (ivFlower != null) {
                 try {
-                    String path = "flower_image/" + flower.imageResource + ".png";
+                    String imageName = (flower.imageResource != null) ? flower.imageResource.trim() : "default";
+                    if (!imageName.toLowerCase().endsWith(".png")) {
+                        imageName += ".png";
+                    }
+                    String path = "flower_image/" + imageName;
                     InputStream is = context.getAssets().open(path);
                     Drawable d = Drawable.createFromStream(is, null);
                     ivFlower.setImageDrawable(d);

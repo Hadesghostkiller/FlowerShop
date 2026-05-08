@@ -13,6 +13,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlowerShop">
         <activity
+            android:name=".activities.AdminAddEditProductActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.AdminManageProductsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.AdminDashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.CategoryActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.EditProfileActivity"
             android:exported="false" />
         <activity
@@ -23,6 +35,9 @@
             android:exported="false" />
         <activity
             android:name=".activities.ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.FavoriteActivity"
             android:exported="false" />
         <activity
             android:name=".activities.SplashActivity"

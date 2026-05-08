@@ -3,6 +3,9 @@ package com.example.flowershop.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -13,9 +16,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 import com.example.flowershop.R;
 import com.example.flowershop.adapters.BannerAdapter;
+import com.example.flowershop.adapters.CategoryAdapter;
 import com.example.flowershop.adapters.FlowerAdapter;
 import com.example.flowershop.api.SupabaseClient;
 import com.example.flowershop.model.Banner;
+import com.example.flowershop.model.Category;
+import com.example.flowershop.model.FavoriteItem;
 import com.example.flowershop.model.SupabaseFlower;
 import com.example.flowershop.sync.SupabaseSync;
 import com.google.android.material.tabs.TabLayout;
@@ -23,6 +29,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +41,8 @@ import retrofit2.Response;
 public class MenuActivity extends AppCompatActivity {
     private ViewPager2 viewPagerBanner;
     private TabLayout tabDots;
-    private RecyclerView rvBestSeller;
+    private RecyclerView rvCategory, rvBestSeller;
+    private CategoryAdapter categoryAdapter;
     private FlowerAdapter bestSellerAdapter;
     private FirebaseAuth mAuth;
     private AutoCompleteTextView autoCompleteSearch;
@@ -47,12 +55,26 @@ public class MenuActivity extends AppCompatActivity {
         initViews();
         setupBottomNavigation();
         loadBanners();
+        loadCategories();
         loadBestSellers();
+        
+        // Hiệu ứng nhẹ khi vào trang
+        View navHome = findViewById(R.id.navHomeContainer);
+        if (navHome != null) {
+            animateSelection(navHome);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadFavorites();
     }
 
     private void initViews() {
         viewPagerBanner = findViewById(R.id.viewPagerBanner);
         tabDots = findViewById(R.id.tabDots);
+        rvCategory = findViewById(R.id.rvCategory);
         rvBestSeller = findViewById(R.id.rvBestSeller);
         autoCompleteSearch = findViewById(R.id.autoCompleteSearch);
 
@@ -65,14 +87,45 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void setupBottomNavigation() {
-        findViewById(R.id.navCartContainer).setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
-        findViewById(R.id.navProfileContainer).setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        findViewById(R.id.navWishlistContainer).setOnClickListener(v -> {
+            animateSelection(v);
+            Intent intent = new Intent(this, FavoriteActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+        });
+
+        findViewById(R.id.navHomeContainer).setOnClickListener(v -> {
+            animateSelection(v);
+        });
+
+        findViewById(R.id.navCartContainer).setOnClickListener(v -> {
+            animateSelection(v);
+            startActivity(new Intent(this, CartActivity.class));
+        });
+
+        findViewById(R.id.navProfileContainer).setOnClickListener(v -> {
+            animateSelection(v);
+            startActivity(new Intent(this, ProfileActivity.class));
+        });
+        
         findViewById(R.id.navProfileContainer).setOnLongClickListener(v -> {
             mAuth.signOut();
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return true;
         });
+    }
+
+    private void animateSelection(View view) {
+        ScaleAnimation scaleAnimation = new ScaleAnimation(
+                0.8f, 1.0f,
+                0.8f, 1.0f,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f
+        );
+        scaleAnimation.setDuration(300);
+        view.startAnimation(scaleAnimation);
     }
 
     private void loadBanners() {
@@ -92,8 +145,32 @@ public class MenuActivity extends AppCompatActivity {
         });
     }
 
+    private void loadCategories() {
+        categoryAdapter = new CategoryAdapter(category -> {
+            Intent intent = new Intent(this, CategoryActivity.class);
+            intent.putExtra("category_id", category.id);
+            intent.putExtra("category_name", category.name);
+            startActivity(intent);
+        });
+        rvCategory.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvCategory.setAdapter(categoryAdapter);
+
+        SupabaseClient.getApi().getCategories().enqueue(new Callback<List<Category>>() {
+            @Override
+            public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    categoryAdapter.setCategories(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Category>> call, Throwable t) {
+                Log.e("CATEGORY_ERROR", t.getMessage());
+            }
+        });
+    }
+
     private void loadBestSellers() {
-        // CẬP NHẬT: Thay vì gọi Toast, ta gọi hàm thêm vào giỏ hàng
         bestSellerAdapter = new FlowerAdapter(flower -> addToCartToSupabase(flower));
 
         rvBestSeller.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -103,7 +180,10 @@ public class MenuActivity extends AppCompatActivity {
             @Override
             public void onResponse(retrofit2.Call<List<SupabaseFlower>> call, retrofit2.Response<List<SupabaseFlower>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    runOnUiThread(() -> bestSellerAdapter.setFlowersFromSupabase(response.body()));
+                    runOnUiThread(() -> {
+                        bestSellerAdapter.setFlowersFromSupabase(response.body());
+                        loadFavorites();
+                    });
                 }
             }
 
@@ -114,7 +194,31 @@ public class MenuActivity extends AppCompatActivity {
         });
     }
 
-    // THÊM MỚI: Hàm xử lý thêm vào giỏ hàng Supabase
+    private void loadFavorites() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return;
+
+        SupabaseClient.getApi().getFavoritesByUserId("eq." + user.getUid()).enqueue(new Callback<List<FavoriteItem>>() {
+            @Override
+            public void onResponse(Call<List<FavoriteItem>> call, Response<List<FavoriteItem>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Integer> ids = new ArrayList<>();
+                    for (FavoriteItem item : response.body()) {
+                        ids.add((int) item.getFlower_id());
+                    }
+                    if (bestSellerAdapter != null) {
+                        bestSellerAdapter.setFavoriteFlowerIds(ids);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<FavoriteItem>> call, Throwable t) {
+                Log.e("FAVORITE_ERROR", t.getMessage());
+            }
+        });
+    }
+
     private void addToCartToSupabase(SupabaseFlower flower) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) {
@@ -122,17 +226,11 @@ public class MenuActivity extends AppCompatActivity {
             return;
         }
 
-        //Toast.makeText(this, "Đang thêm " + flower.flowerName + "...", Toast.LENGTH_SHORT).show();
-
-        // Chuẩn bị dữ liệu JSON để gửi lên bảng 'cart' trên Supabase
         Map<String, Object> cartData = new HashMap<>();
         cartData.put("user_id", user.getUid());
-
-        // Lưu ý: Nếu id bị gạch chân báo lỗi do access modifier (private), hãy sửa thành flower.getId()
         cartData.put("flower_id", flower.id);
-        cartData.put("quantity", 1); // Mặc định mỗi lần bấm thêm 1 bông
+        cartData.put("quantity", 1);
 
-        // Gọi API Insert (Yêu cầu phải có hàm addToCart trong file SupabaseApi.java như đã làm ở trên)
         SupabaseClient.getApi().addToCart(cartData).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
