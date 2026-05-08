@@ -1,5 +1,6 @@
 package com.example.flowershop.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -41,7 +42,8 @@ public class CartActivity extends AppCompatActivity {
     private List<CartItem> cartItemList;
     private String currentUserId;
     private FirebaseAuth mAuth;
-    private boolean isProgrammaticChange = false; // Tránh loop sự kiện
+    private boolean isProgrammaticChange = false;
+    private double totalPrice = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +62,12 @@ public class CartActivity extends AppCompatActivity {
         }
 
         initViews();
+        loadCartData();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         loadCartData();
     }
 
@@ -212,19 +220,13 @@ public class CartActivity extends AppCompatActivity {
     private void calculateTotal() {
         try {
             int totalItems = 0;
-            double totalPrice = 0;
+            totalPrice = 0;
 
             for (CartItem item : cartItemList) {
-                // SỬA ĐỔI: Chỉ cộng tiền những món ĐƯỢC TICK
                 if (item.isSelected()) {
                     totalItems += item.getQuantity();
-
                     if (item.getFlowers() != null) {
-                        try {
-                            totalPrice += (item.getQuantity() * item.getFlowers().price);
-                        } catch (Exception e) {
-                            Log.e("CART_CRASH", "Lỗi tính giá tiền: " + e.getMessage());
-                        }
+                        totalPrice += (item.getQuantity() * item.getFlowers().price);
                     }
                 }
             }
@@ -232,7 +234,6 @@ public class CartActivity extends AppCompatActivity {
             if (tvTotalItems != null) {
                 tvTotalItems.setText(String.valueOf(totalItems));
             }
-
             if (tvTotalPrice != null) {
                 tvTotalPrice.setText(String.format("%,.0f VND", totalPrice));
             }
@@ -243,7 +244,6 @@ public class CartActivity extends AppCompatActivity {
     }
 
     private void checkout() {
-        // Kiểm tra xem có sản phẩm nào được chọn không
         boolean hasSelectedItem = false;
         for (CartItem item : cartItemList) {
             if (item.isSelected()) {
@@ -262,6 +262,16 @@ public class CartActivity extends AppCompatActivity {
             return;
         }
 
-        Toast.makeText(this, "Chức năng thanh toán đang phát triển!", Toast.LENGTH_SHORT).show();
+        ArrayList<CartItem> selectedItems = new ArrayList<>();
+        for (CartItem item : cartItemList) {
+            if (item.isSelected()) {
+                selectedItems.add(item);
+            }
+        }
+
+        Intent intent = new Intent(this, CheckoutActivity.class);
+        intent.putExtra("totalAmount", totalPrice);
+        intent.putExtra("cartItems", selectedItems);
+        startActivity(intent);
     }
 }
