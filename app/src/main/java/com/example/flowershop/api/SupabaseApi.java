@@ -15,6 +15,7 @@ import retrofit2.http.GET;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
+import retrofit2.http.Header;
 
 public interface SupabaseApi {
     @GET("rest/v1/flowers?select=*")
@@ -76,4 +77,17 @@ public interface SupabaseApi {
 
     @DELETE("rest/v1/flowers")
     Call<Void> deleteFlower(@Query(value = "id", encoded = true) String idEq);
+
+
+    // Order history
+    @POST("rest/v1/order")
+    Call<Void> createOrder(
+            @Header("Prefer") String prefer,
+            @Body com.example.flowershop.model.Order order // Viết đầy đủ package ở đây
+    );
+
+    @GET("rest/v1/order")
+    Call<List<com.example.flowershop.model.Order>> getOrders(
+            @Query("user_id") String userIdQuery
+    );
 }

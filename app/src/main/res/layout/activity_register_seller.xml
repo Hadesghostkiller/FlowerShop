@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:padding="24dp">
+
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@android:drawable/ic_menu_revert"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:tint="#E91E63" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Đăng ký bán hàng"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="#1E293B"
+        android:layout_marginTop="24dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Vui lòng cung cấp thông tin chính xác để mở gian hàng của bạn."
+        android:textColor="#64748B"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="32dp"/>
+
+    <EditText
+        android:id="@+id/etIDCard"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:hint="Số CCCD"
+        android:inputType="number"
+        android:paddingHorizontal="16dp"
+        android:background="@android:drawable/editbox_background"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/etAddress"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:hint="Địa chỉ shop"
+        android:paddingHorizontal="16dp"
+        android:background="@android:drawable/editbox_background"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/etPhone"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:hint="Số điện thoại shop"
+        android:inputType="phone"
+        android:paddingHorizontal="16dp"
+        android:background="@android:drawable/editbox_background"
+        android:layout_marginBottom="32dp"/>
+
+    <Button
+        android:id="@+id/btnSubmit"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Xác nhận"
+        android:backgroundTint="#E91E63"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        app:cornerRadius="12dp"/>
+
+</LinearLayout>

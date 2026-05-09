@@ -3,6 +3,7 @@ package com.example.flowershop.activities;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +21,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.flowershop.R;
 import com.example.flowershop.api.SupabaseClient;
 import com.example.flowershop.model.CartItem;
+import com.example.flowershop.model.Order;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -135,10 +139,10 @@ public class CheckoutActivity extends AppCompatActivity {
         });
 
         AlertDialog cashDialog = new AlertDialog.Builder(this)
-            .setTitle("Thanh toán tiền mặt")
-            .setView(dialogView)
-            .setCancelable(false)
-            .show();
+                .setTitle("Thanh toán tiền mặt")
+                .setView(dialogView)
+                .setCancelable(false)
+                .show();
 
         btnConfirmCash.setOnClickListener(v -> {
             double customerMoney = Double.parseDouble(etCustomerMoney.getText().toString().trim());
@@ -157,11 +161,11 @@ public class CheckoutActivity extends AppCompatActivity {
         tvContent.setText(buildBillContent(name, phone, email, address, customerMoney, change));
 
         new AlertDialog.Builder(this)
-            .setTitle("Hóa đơn")
-            .setView(billView)
-            .setPositiveButton("Đóng", (d, w) -> clearCartAndReset())
-            .setCancelable(false)
-            .show();
+                .setTitle("Hóa đơn")
+                .setView(billView)
+                .setPositiveButton("Đóng", (d, w) -> saveOrdersSeparately())
+                .setCancelable(false)
+                .show();
     }
 
     private void showTransferBillPreview(String name, String phone, String email, String address) {
@@ -172,20 +176,71 @@ public class CheckoutActivity extends AppCompatActivity {
 
         String qrUrl = buildVietQrUrl(totalAmount);
         Glide.with(this)
-            .load(qrUrl)
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
-            .skipMemoryCache(true)
-            .error(R.drawable.qr_code)
-            .into(ivQr);
+                .load(qrUrl)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .error(R.drawable.qr_code)
+                .into(ivQr);
 
         tvContent.setText(buildTransferBillContent(name, phone, email, address));
 
         new AlertDialog.Builder(this)
-            .setTitle("Hóa đơn")
-            .setView(billView)
-            .setPositiveButton("Đóng", (d, w) -> clearCartAndReset())
-            .setCancelable(false)
-            .show();
+                .setTitle("Hóa đơn")
+                .setView(billView)
+                .setPositiveButton("Đóng", (d, w) -> saveOrdersSeparately())
+                .setCancelable(false)
+                .show();
+    }
+
+    private void saveOrdersSeparately() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null || selectedItems.isEmpty()) return;
+
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String customerName = etName.getText().toString().trim();
+        String phone = etPhone.getText().toString().trim();
+        String address = etAddress.getText().toString().trim();
+
+        final int totalRequests = selectedItems.size();
+        final int[] completedRequests = {0};
+
+        for (CartItem item : selectedItems) {
+            Order order = new Order();
+            order.user_id = userId;
+            order.customer_name = customerName;
+            order.phone = phone;
+            order.address = address;
+            order.payment_method = paymentMethod;
+            order.status = "Hoàn tất";
+
+            // Lưu thông tin chi tiết của DUY NHẤT sản phẩm này
+            String flowerName = (item.getFlowers() != null) ? item.getFlowers().flowerName : "Hoa";
+            order.order_details = flowerName + " (x" + item.getQuantity() + ")";
+
+            // Tính số tiền riêng cho sản phẩm này (Số lượng x Đơn giá)
+            double itemPrice = (item.getFlowers() != null) ? item.getFlowers().price : 0;
+            order.total_amount = item.getQuantity() * itemPrice;
+
+            SupabaseClient.getApi().createOrder("return=representation", order).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    completedRequests[0]++;
+                    checkAndFinish(completedRequests[0], totalRequests);
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    completedRequests[0]++;
+                    checkAndFinish(completedRequests[0], totalRequests);
+                }
+            });
+        }
+    }
+
+    private void checkAndFinish(int current, int total) {
+        if (current == total) {
+            Log.d("CHECKOUT", "Tất cả các món đã được lưu riêng biệt.");
+            clearCartAndReset();
+        }
     }
 
     private String buildVietQrUrl(double amount) {
@@ -197,8 +252,8 @@ public class CheckoutActivity extends AppCompatActivity {
             info = java.net.URLEncoder.encode(info, "UTF-8");
         } catch (Exception ignored) {}
         return String.format(Locale.US,
-            "https://img.vietqr.io/image/%s-%s-%s.png?amount=%.0f&addInfo=%s",
-            bankCode, accountNo, template, amount, info);
+                "https://img.vietqr.io/image/%s-%s-%s.png?amount=%.0f&addInfo=%s",
+                bankCode, accountNo, template, amount, info);
     }
 
     private String buildBillContent(String name, String phone, String email, String address,
@@ -288,5 +343,7 @@ public class CheckoutActivity extends AppCompatActivity {
         tvTotalAmount.setText("0 VND");
         btnConfirm.setEnabled(false);
         btnConfirm.setText("Đã thanh toán");
+        Toast.makeText(this, "Thanh toán thành công!", Toast.LENGTH_SHORT).show();
+        finish();
     }
 }

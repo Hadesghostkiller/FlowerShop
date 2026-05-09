@@ -13,10 +13,19 @@ import com.example.flowershop.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import android.graphics.Color;
+import android.os.Build;
+import android.view.Window;
+import android.view.WindowManager;
+
 public class SplashActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Window window = getWindow();
+
+        window.setStatusBarColor(Color.parseColor("#FFFFFF"));
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 

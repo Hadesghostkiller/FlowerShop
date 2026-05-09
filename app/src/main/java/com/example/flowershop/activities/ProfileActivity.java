@@ -1,7 +1,9 @@
 package com.example.flowershop.activities;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -15,6 +17,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import com.bumptech.glide.Glide;
@@ -34,12 +37,13 @@ public class ProfileActivity extends AppCompatActivity {
     private ImageView imgAvatar, btnBack, btnEditProfile;
     private CardView btnEditAvatar;
     private TextView tvFullName, tvEmail, tvPhone, tvDob;
-    private View menuLogout, menuSettings, menuRating, menuFavorites, menuProducts, menuTotalMoney;
+    private View menuLogout, menuSettings, menuRating, menuProducts, menuOrderHistory, menuRegisterSeller;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private String userId;
     private Uri cameraImageUri;
+    private boolean isSeller = false;
 
     private final String appId = "default-app-id";
 
@@ -57,13 +61,24 @@ public class ProfileActivity extends AppCompatActivity {
             registerForActivityResult(new ActivityResultContracts.TakePicture(), success -> {
                 if (success && cameraImageUri != null) {
                     saveImageLocally(cameraImageUri);
+                } else {
+                    Log.d("CAMERA_LOG", "Chụp ảnh thất bại hoặc người dùng hủy.");
+                }
+            });
+
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    startCameraIntent();
+                } else {
+                    Toast.makeText(this, "Bạn cần cấp quyền Camera để chụp ảnh", Toast.LENGTH_SHORT).show();
                 }
             });
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 100 && resultCode == RESULT_OK) {
+        if ((requestCode == 100 || requestCode == 200) && resultCode == RESULT_OK) {
             loadUser();
         }
     }
@@ -100,11 +115,13 @@ public class ProfileActivity extends AppCompatActivity {
         menuLogout = findViewById(R.id.menuLogout);
         menuSettings = findViewById(R.id.menuSettings);
         menuRating = findViewById(R.id.menuRating);
-        menuFavorites = findViewById(R.id.menuFavorites);
-        
-        // Khai báo thêm các nút Admin
         menuProducts = findViewById(R.id.menuProducts);
-        menuTotalMoney = findViewById(R.id.menuTotalMoney);
+        menuOrderHistory = findViewById(R.id.menuOrderHistory);
+        menuRegisterSeller = findViewById(R.id.menuRegisterSeller);
+
+        // ĐÃ SỬA: Ẩn ngay từ đầu để tránh hiện tượng nháy (flicker)
+        if (menuProducts != null) menuProducts.setVisibility(View.INVISIBLE);
+        if (menuRegisterSeller != null) menuRegisterSeller.setVisibility(View.GONE);
     }
 
     private void loadUser() {
@@ -113,15 +130,6 @@ public class ProfileActivity extends AppCompatActivity {
             tvEmail.setText(user.getEmail());
             if (user.getDisplayName() != null)
                 tvFullName.setText(user.getDisplayName());
-                
-            // Kiểm tra nếu là admin thì hiển thị các tính năng admin (Ví dụ: admin@gmail.com)
-            if (user.getEmail() != null && user.getEmail().equals("admin@gmail.com")) {
-                if (menuProducts != null) menuProducts.setVisibility(View.VISIBLE);
-                if (menuTotalMoney != null) menuTotalMoney.setVisibility(View.VISIBLE);
-            } else {
-                // Nếu không phải admin có thể ẩn đi
-                // if (menuProducts != null) menuProducts.setVisibility(View.GONE);
-            }
         }
 
         File localFile = new File(getFilesDir(), "avatar_" + userId + ".jpg");
@@ -142,6 +150,9 @@ public class ProfileActivity extends AppCompatActivity {
                         String phone = doc.getString("phone");
                         String dob = doc.getString("dob");
                         String name = doc.getString("name");
+                        Boolean sellerStatus = doc.getBoolean("is_seller");
+
+                        isSeller = (sellerStatus != null && sellerStatus);
 
                         tvPhone.setText((phone == null || phone.trim().isEmpty()) ? "Cập nhật" : phone);
                         tvDob.setText("Ngày sinh: " +
@@ -150,11 +161,38 @@ public class ProfileActivity extends AppCompatActivity {
                         if (name != null && !name.trim().isEmpty())
                             tvFullName.setText(name);
                     } else {
+                        // Trường hợp user mới chưa có dữ liệu profile
+                        isSeller = false;
                         tvPhone.setText("Cập nhật");
                         tvDob.setText("Ngày sinh: dd/mm/yyyy");
                     }
+
+                    // LUÔN LUÔN gọi cập nhật UI sau khi đã xác định được isSeller hay chưa
+                    updateSellerUI();
                 })
-                .addOnFailureListener(e -> Log.e("FIRESTORE_ERROR", e.getMessage()));
+                .addOnFailureListener(e -> {
+                    Log.e("FIRESTORE_ERROR", e.getMessage());
+                    updateSellerUI(); // Gọi kể cả khi lỗi để hiện UI mặc định
+                });
+    }
+
+    private void updateSellerUI() {
+        if (menuProducts == null) return;
+
+        // Hiện lại menu Products (vì ở initViews mình để Invisible)
+        menuProducts.setVisibility(View.VISIBLE);
+
+        if (isSeller) {
+            // Đã là người bán: Hiện rõ nút Quản lý, Ẩn nút Đăng ký
+            menuProducts.setAlpha(1.0f);
+            menuProducts.setEnabled(true);
+            if (menuRegisterSeller != null) menuRegisterSeller.setVisibility(View.GONE);
+        } else {
+            // Chưa là người bán: Làm mờ nút Quản lý, Hiện nút Đăng ký
+            menuProducts.setAlpha(0.3f);
+            menuProducts.setEnabled(false);
+            if (menuRegisterSeller != null) menuRegisterSeller.setVisibility(View.VISIBLE);
+        }
     }
 
     private void setupListeners() {
@@ -176,23 +214,25 @@ public class ProfileActivity extends AppCompatActivity {
             });
         }
 
-        if (menuFavorites != null) {
-            menuFavorites.setOnClickListener(v -> {
-                startActivity(new Intent(ProfileActivity.this, FavoriteActivity.class));
+        if (menuRegisterSeller != null) {
+            menuRegisterSeller.setOnClickListener(v -> {
+                Intent intent = new Intent(ProfileActivity.this, RegisterSellerActivity.class);
+                startActivityForResult(intent, 200);
             });
         }
 
-        // Sự kiện click để vào trang Admin Dashboard
         if (menuProducts != null) {
             menuProducts.setOnClickListener(v -> {
-                Intent intent = new Intent(ProfileActivity.this, AdminDashboardActivity.class);
-                startActivity(intent);
+                if (isSeller) {
+                    Intent intent = new Intent(ProfileActivity.this, AdminDashboardActivity.class);
+                    startActivity(intent);
+                }
             });
         }
 
-        if (menuTotalMoney != null) {
-            menuTotalMoney.setOnClickListener(v -> {
-                Intent intent = new Intent(ProfileActivity.this, AdminDashboardActivity.class);
+        if (menuOrderHistory != null) {
+            menuOrderHistory.setOnClickListener(v -> {
+                Intent intent = new Intent(ProfileActivity.this, OrderHistoryActivity.class);
                 startActivity(intent);
             });
         }
@@ -223,9 +263,24 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void openCamera() {
-        File tempFile = new File(getExternalCacheDir(), "temp_camera_image.jpg");
-        cameraImageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider", tempFile);
-        cameraLauncher.launch(cameraImageUri);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            startCameraIntent();
+        } else {
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA);
+        }
+    }
+
+    private void startCameraIntent() {
+        try {
+            File storageDir = getExternalCacheDir();
+            File tempFile = new File(storageDir, "temp_camera_image.jpg");
+            cameraImageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider", tempFile);
+            cameraLauncher.launch(cameraImageUri);
+        } catch (Exception e) {
+            Log.e("CAMERA_ERROR", "Lỗi: " + e.getMessage());
+            Toast.makeText(this, "Không thể mở máy ảnh", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void saveImageLocally(Uri uri) {
@@ -252,7 +307,7 @@ public class ProfileActivity extends AppCompatActivity {
 
             Toast.makeText(this, "Đã cập nhật ảnh đại diện", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            Log.e("LOCAL_STORAGE", "Lỗi: " + e.getMessage());
+            Log.e("LOCAL_STORAGE", "Lỗi lưu ảnh: " + e.getMessage());
         }
     }
 }
