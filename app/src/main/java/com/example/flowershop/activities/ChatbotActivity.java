@@ -161,7 +161,7 @@ public class ChatbotActivity extends AppCompatActivity {
 
             @Override
             public void onError(String error) {
-                addBotMessage("Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau.");
+                addBotMessage("Xin lỗi, có lỗi xảy ra:\n" + error);
             }
         });
     }

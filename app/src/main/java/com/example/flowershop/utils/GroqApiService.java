@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 public class GroqApiService {
 
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-    private static final String API_KEY = "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";
+    private static final String API_KEY = "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"; 
     private static final String MODEL = "llama-3.1-8b-instant";
 
     private final ExecutorService executor;
