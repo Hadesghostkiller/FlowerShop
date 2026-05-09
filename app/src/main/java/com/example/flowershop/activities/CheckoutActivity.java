@@ -14,6 +14,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.flowershop.R;
 import com.example.flowershop.api.SupabaseClient;
 import com.example.flowershop.model.CartItem;
@@ -167,6 +169,15 @@ public class CheckoutActivity extends AppCompatActivity {
         TextView tvContent = billView.findViewById(R.id.tvBillContent);
         ImageView ivQr = billView.findViewById(R.id.ivQrCode);
         ivQr.setVisibility(View.VISIBLE);
+
+        String qrUrl = buildVietQrUrl(totalAmount);
+        Glide.with(this)
+            .load(qrUrl)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .skipMemoryCache(true)
+            .error(R.drawable.qr_code)
+            .into(ivQr);
+
         tvContent.setText(buildTransferBillContent(name, phone, email, address));
 
         new AlertDialog.Builder(this)
@@ -175,6 +186,19 @@ public class CheckoutActivity extends AppCompatActivity {
             .setPositiveButton("Đóng", (d, w) -> clearCartAndReset())
             .setCancelable(false)
             .show();
+    }
+
+    private String buildVietQrUrl(double amount) {
+        String bankCode = "techcombank";
+        String accountNo = "792401048888";
+        String template = "compact";
+        String info = "Thanh toan FlowerShop";
+        try {
+            info = java.net.URLEncoder.encode(info, "UTF-8");
+        } catch (Exception ignored) {}
+        return String.format(Locale.US,
+            "https://img.vietqr.io/image/%s-%s-%s.png?amount=%.0f&addInfo=%s",
+            bankCode, accountNo, template, amount, info);
     }
 
     private String buildBillContent(String name, String phone, String email, String address,
