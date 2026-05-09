@@ -123,7 +123,7 @@
                         android:layout_height="52dp"
                         android:background="@drawable/bg_button"
                         app:backgroundTint="#C2185B"
-                        android:text="Lưu thay đổi"
+                        android:text="Lưu"
                         android:textColor="#FFFFFF"
                         android:textStyle="bold"
                         android:textSize="16sp"/>

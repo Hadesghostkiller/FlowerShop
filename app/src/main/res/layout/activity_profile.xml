@@ -66,7 +66,7 @@
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
                         android:background="#E0E0E0"
-                        android:src="@android:drawable/ic_menu_myplaces" />
+                        android:src="@drawable/user" />
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
@@ -84,7 +84,7 @@
                         android:layout_height="match_parent"
                         android:background="#FFFFFF"
                         android:padding="5dp"
-                        android:src="@android:drawable/ic_menu_camera"
+                        android:src="@drawable/camera"
                         app:tint="#000000" />
                 </androidx.cardview.widget.CardView>
             </FrameLayout>
@@ -110,7 +110,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="Ngày sinh: dd/mm/yyyy"
-                    android:textColor="#475569"
+                    android:textColor="#000000"
                     android:textSize="13sp" />
             </LinearLayout>
         </LinearLayout>
@@ -139,7 +139,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:text="Cập nhật"
-                    android:textColor="#475569"
+                    android:textColor="#000000"
                     android:textSize="14sp" />
             </LinearLayout>
 
@@ -160,88 +160,50 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:text="Email..."
-                    android:textColor="#475569"
+                    android:textColor="#000000"
                     android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 4. KHUNG THỐNG KÊ -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="24dp"
             android:background="#33000000" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingVertical="16dp">
-                <TextView
-                    android:id="@+id/tvOrdersBought"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0"
-                    android:textColor="#1E293B"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Đơn đã mua"
-                    android:textColor="#475569"
-                    android:textSize="13sp" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:background="#33000000" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingVertical="16dp">
-                <TextView
-                    android:id="@+id/tvOrdersSold"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0"
-                    android:textColor="#1E293B"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Đơn đã bán"
-                    android:textColor="#475569"
-                    android:textSize="13sp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#33000000" />
-
-        <!-- 5. DANH SÁCH MENU -->
+        <!-- 4. DANH SÁCH MENU -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:orientation="vertical"
             android:paddingBottom="30dp">
+
+            <!-- THÊM MỤC: TRỞ THÀNH NGƯỜI BÁN -->
+            <LinearLayout
+                android:id="@+id/menuRegisterSeller"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="24dp"
+                android:paddingVertical="16dp">
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/admin"
+                    app:tint="#E91E63" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:text="Đăng ký bán hoa"
+                    android:textColor="#E91E63"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/menuProducts"
@@ -256,20 +218,20 @@
                 <ImageView
                     android:layout_width="22dp"
                     android:layout_height="22dp"
-                    android:src="@android:drawable/ic_menu_agenda"
+                    android:src="@drawable/shop"
                     app:tint="#000000" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
-                    android:text="Sản phẩm của tôi"
-                    android:textColor="#1E293B"
+                    android:text="Quản lý cửa hàng"
+                    android:textColor="#000000"
                     android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/menuFavorites"
+                android:id="@+id/menuOrderHistory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?android:attr/selectableItemBackground"
@@ -281,38 +243,13 @@
                 <ImageView
                     android:layout_width="22dp"
                     android:layout_height="22dp"
-                    android:src="@android:drawable/ic_menu_myplaces"
+                    android:src="@drawable/order"
                     app:tint="#000000" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
-                    android:text="Hoa yêu thích"
-                    android:textColor="#1E293B"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/menuTotalMoney"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="24dp"
-                android:paddingVertical="16dp">
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@android:drawable/ic_menu_view"
-                    app:tint="#000000" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:text="Tổng doanh thu"
+                    android:text="Đơn hàng đã mua"
                     android:textColor="#1E293B"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -331,7 +268,7 @@
                 <ImageView
                     android:layout_width="22dp"
                     android:layout_height="22dp"
-                    android:src="@android:drawable/ic_menu_share"
+                    android:src="@drawable/share"
                     app:tint="#000000" />
                 <TextView
                     android:layout_width="wrap_content"
@@ -381,14 +318,14 @@
                 <ImageView
                     android:layout_width="22dp"
                     android:layout_height="22dp"
-                    android:src="@android:drawable/ic_menu_preferences"
+                    android:src="@drawable/setting"
                     app:tint="#000000" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
                     android:text="Cài đặt"
-                    android:textColor="#1E293B"
+                    android:textColor="#000000"
                     android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -413,14 +350,14 @@
                 <ImageView
                     android:layout_width="22dp"
                     android:layout_height="22dp"
-                    android:src="@android:drawable/ic_lock_power_off"
+                    android:src="@drawable/logout"
                     app:tint="#000000" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
                     android:text="Đăng xuất"
-                    android:textColor="#E53935"
+                    android:textColor="#000000"
                     android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
