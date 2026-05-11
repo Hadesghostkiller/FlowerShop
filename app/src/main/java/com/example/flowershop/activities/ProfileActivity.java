@@ -37,7 +37,7 @@ public class ProfileActivity extends AppCompatActivity {
     private ImageView imgAvatar, btnBack, btnEditProfile;
     private CardView btnEditAvatar;
     private TextView tvFullName, tvEmail, tvPhone, tvDob;
-    private View menuLogout, menuSettings, menuRating, menuProducts, menuOrderHistory, menuRegisterSeller;
+    private View menuLogout, menuSettings, menuRating, menuProducts, menuOrderHistory, menuRegisterSeller, menuInvite;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -118,6 +118,7 @@ public class ProfileActivity extends AppCompatActivity {
         menuProducts = findViewById(R.id.menuProducts);
         menuOrderHistory = findViewById(R.id.menuOrderHistory);
         menuRegisterSeller = findViewById(R.id.menuRegisterSeller);
+        menuInvite = findViewById(R.id.menuInvite);
 
         // ĐÃ SỬA: Ẩn ngay từ đầu để tránh hiện tượng nháy (flicker)
         if (menuProducts != null) menuProducts.setVisibility(View.INVISIBLE);
@@ -206,6 +207,13 @@ public class ProfileActivity extends AppCompatActivity {
             intent.putExtra("dob", tvDob.getText().toString());
             startActivityForResult(intent, 100);
         });
+
+        if (menuInvite != null) {
+            menuInvite.setOnClickListener(v -> {
+                Intent intent = new Intent(ProfileActivity.this, AppOverviewActivity.class);
+                startActivity(intent);
+            });
+        }
 
         if (menuRating != null) {
             menuRating.setOnClickListener(v -> {
