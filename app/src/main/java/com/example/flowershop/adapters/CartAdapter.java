@@ -66,6 +66,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.cbItem.setOnCheckedChangeListener(null);
         holder.cbItem.setChecked(cartItem.isSelected());
 
+        // Hiển thị Mã đơn hàng
+        holder.tvMaDonHang.setText("Mã: " + cartItem.getMa_don_hang());
+
         if (flower != null) {
             holder.tvName.setText(flower.flowerName != null ? flower.flowerName : "Hoa chưa rõ tên");
             holder.tvPrice.setText(String.format("%,.0f VND", flower.price));
@@ -77,7 +80,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                     Drawable d = Drawable.createFromStream(is, null);
                     holder.ivImage.setImageDrawable(d);
                 } catch (Exception e) {
-                    e.printStackTrace();
                     holder.ivImage.setImageResource(android.R.drawable.ic_menu_gallery);
                 }
             }
@@ -122,7 +124,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     public static class CartViewHolder extends RecyclerView.ViewHolder {
         CheckBox cbItem;
         ImageView ivImage;
-        TextView tvName, tvPrice, tvQuantity;
+        TextView tvName, tvPrice, tvQuantity, tvMaDonHang;
         ImageButton btnDelete, btnMinus, btnAdd;
 
         public CartViewHolder(@NonNull View itemView) {
@@ -132,6 +134,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             tvName = itemView.findViewById(R.id.tvCartName);
             tvPrice = itemView.findViewById(R.id.tvCartPrice);
             tvQuantity = itemView.findViewById(R.id.tvCartQuantity);
+            tvMaDonHang = itemView.findViewById(R.id.tvMaDonHang);
             btnDelete = itemView.findViewById(R.id.btnDeleteCartItem);
             btnMinus = itemView.findViewById(R.id.btnMinusCart);
             btnAdd = itemView.findViewById(R.id.btnAddCart);

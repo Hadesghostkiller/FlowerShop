@@ -15,7 +15,6 @@
         android:padding="12dp"
         android:gravity="center_vertical">
 
-        <!-- Đã sử dụng MaterialCheckBox và app:buttonTint -->
         <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/cbItemCart"
             android:layout_width="wrap_content"
@@ -23,7 +22,6 @@
             android:layout_marginEnd="8dp"
             app:buttonTint="#E91E63" />
 
-        <!-- Hình ảnh hoa -->
         <ImageView
             android:id="@+id/ivCartImage"
             android:layout_width="70dp"
@@ -31,13 +29,20 @@
             android:scaleType="centerCrop"
             android:background="#EEEEEE" />
 
-        <!-- Tên và Giá -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
             android:layout_marginStart="16dp">
+
+            <TextView
+                android:id="@+id/tvMaDonHang"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mã: 000000"
+                android:textSize="12sp"
+                android:textColor="#888888" />
 
             <TextView
                 android:id="@+id/tvCartName"
@@ -58,7 +63,6 @@
                 android:layout_marginTop="4dp" />
         </LinearLayout>
 
-        <!-- Bộ tinh chỉnh số lượng -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -95,7 +99,6 @@
                 android:padding="4dp"/>
         </LinearLayout>
 
-        <!-- Nút Xóa -->
         <ImageButton
             android:id="@+id/btnDeleteCartItem"
             android:layout_width="36dp"

@@ -23,9 +23,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -72,8 +72,8 @@ public class CartActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Không gọi loadCartData() ở đây nếu đã gọi ở onCreate để tránh xung đột logic buyNow
-        // Hoặc đảm bảo logic buyNow vẫn chạy được.
+        // Cập nhật lại giỏ hàng khi quay lại từ Checkout
+        loadCartData();
     }
 
     private void initViews() {
@@ -128,28 +128,15 @@ public class CartActivity extends AppCompatActivity {
                             List<CartItem> rawList = response.body();
                             cartItemList.clear();
 
-                            HashMap<Integer, CartItem> mergedMap = new HashMap<>();
+                            // Không thực hiện gộp (merge) nữa để giữ các lời chúc/ghi chú riêng biệt cho từng dòng
                             for (CartItem item : rawList) {
-                                // Mặc định KHÔNG tích chọn
                                 item.setSelected(false);
-                                
-                                // Nếu là Buy Now từ trang chi tiết, chỉ tích chọn đúng sản phẩm đó
                                 if (buyNowFlowerId != -1 && item.getFlower_id() == buyNowFlowerId) {
                                     item.setSelected(true);
                                 }
-
-                                int fId = item.getFlower_id();
-                                if (mergedMap.containsKey(fId)) {
-                                    CartItem existingItem = mergedMap.get(fId);
-                                    existingItem.setQuantity(existingItem.getQuantity() + item.getQuantity());
-                                    // Nếu cái mới được chọn thì cái cũ cũng nên được chọn (trường hợp gộp)
-                                    if (item.isSelected()) existingItem.setSelected(true);
-                                } else {
-                                    mergedMap.put(fId, item);
-                                }
+                                cartItemList.add(item);
                             }
 
-                            cartItemList.addAll(mergedMap.values());
                             cartAdapter.notifyDataSetChanged();
 
                             if (cartItemList.isEmpty()) {
@@ -162,8 +149,6 @@ public class CartActivity extends AppCompatActivity {
                                 cbSelectAll.setVisibility(View.VISIBLE);
                                 updateSelectAllCheckboxState();
                                 calculateTotal();
-                                
-                                // Reset buyNowFlowerId sau khi đã xử lý xong để không ảnh hưởng lần reload sau
                                 buyNowFlowerId = -1;
                             }
                         } else {
@@ -186,13 +171,13 @@ public class CartActivity extends AppCompatActivity {
 
     private void updateItemQuantity(CartItem item, int newQuantity) {
         SupabaseApi api = SupabaseClient.getApi();
-        String qUserId = "eq." + currentUserId;
-        String qFlowerId = "eq." + item.getFlower_id();
+        // Sử dụng ID chính của hàng (row id) để update chính xác thay vì flower_id
+        String qId = "eq." + item.getId();
 
         Map<String, Object> updates = new HashMap<>();
         updates.put("quantity", newQuantity);
 
-        api.updateCartQuantity(qUserId, qFlowerId, updates).enqueue(new Callback<Void>() {
+        api.updateCartQuantity("eq." + currentUserId, "eq." + item.getFlower_id(), updates).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
@@ -209,6 +194,7 @@ public class CartActivity extends AppCompatActivity {
     }
 
     private void deleteItemFromCart(CartItem item) {
+        // Xóa dựa trên id duy nhất của cart item
         SupabaseClient.getApi().deleteCartItem("eq." + currentUserId, "eq." + item.getFlower_id())
                 .enqueue(new Callback<Void>() {
             @Override

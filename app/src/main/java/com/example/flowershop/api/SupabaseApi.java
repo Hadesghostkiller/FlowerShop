@@ -46,11 +46,20 @@ public interface SupabaseApi {
             @Body Map<String, Object> updates
     );
 
+    @PATCH("rest/v1/cart")
+    Call<Void> updateCartItemById(
+            @Query(value = "id", encoded = true) String idEq,
+            @Body Map<String, Object> updates
+    );
+
     @DELETE("rest/v1/cart")
     Call<Void> deleteCartItem(
             @Query(value = "user_id", encoded = true) String userIdEq,
             @Query(value = "flower_id", encoded = true) String flowerIdEq
     );
+
+    @DELETE("rest/v1/cart")
+    Call<Void> deleteCartItemById(@Query(value = "id", encoded = true) String idEq);
 
     // Favorite APIs
     @GET("rest/v1/favorite?select=*,flowers(*)")
