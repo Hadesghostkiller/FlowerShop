@@ -1,62 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#FFFFFF">
 
-    <!-- Header -->
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="#E91E63">
+        android:layout_height="?attr/actionBarSize"
+        android:paddingHorizontal="16dp"
+        android:background="#E91E63"
+        android:elevation="4dp">
 
         <ImageButton
             android:id="@+id/btnBack"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:layout_centerVertical="true"
             android:src="@android:drawable/ic_menu_revert"
+            app:tint="#FFFFFF"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Back" />
 
         <TextView
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_centerInParent="true"
             android:text="Tìm kiếm sản phẩm"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:layout_gravity="center_vertical" />
+            android:textStyle="bold" />
+    </RelativeLayout>
 
-    </LinearLayout>
-
-    <!-- Search -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="16dp"
+        android:gravity="center_vertical">
 
-        <EditText
-            android:id="@+id/etSearch"
+        <androidx.cardview.widget.CardView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
-            android:hint="Nhập tên hoa cần tìm..."
-            android:padding="12dp"
-            android:background="@android:drawable/edit_text"/>
+            app:cardCornerRadius="24dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="#F5F5F5">
 
-        <Button
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_search"
+                    app:tint="#888888" />
+
+                <EditText
+                    android:id="@+id/etSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent"
+                    android:hint="Nhập tên hoa cần tìm..."
+                    android:textSize="14sp"
+                    android:paddingStart="10dp"
+                    android:inputType="text"
+                    android:textColor="#333333"
+                    android:textColorHint="#999999"
+                    android:maxLines="1"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSearch"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:text="Tìm"
+            android:textColor="#FFFFFF"
+            android:textAllCaps="false"
+            android:textStyle="bold"
             android:backgroundTint="#E91E63"
-            android:layout_marginStart="8dp"/>
+            android:layout_marginStart="12dp"
+            app:cornerRadius="24dp"
+            app:elevation="2dp" />
 
     </LinearLayout>
 
@@ -65,15 +97,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Kết quả tìm kiếm:"
-        android:textSize="16sp"
+        android:textSize="15sp"
+        android:textColor="#666666"
         android:textStyle="bold"
-        android:padding="16dp"/>
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="8dp"/>
 
-    <!-- Results -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
         android:padding="8dp"/>
 
 </LinearLayout>
