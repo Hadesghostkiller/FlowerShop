@@ -9,8 +9,8 @@ public class CartItem implements Serializable {
     private int quantity;
     private SupabaseFlower flowers;
 
-    // Biến để lưu trạng thái tick chọn (mặc định là true - đã chọn)
-    private boolean isSelected = true;
+    // Biến để lưu trạng thái tick chọn (Mặc định là false - chưa chọn)
+    private boolean isSelected = false;
 
     public CartItem() {
     }
@@ -30,7 +30,6 @@ public class CartItem implements Serializable {
     public SupabaseFlower getFlowers() { return flowers; }
     public void setFlowers(SupabaseFlower flowers) { this.flowers = flowers; }
 
-    // GETTER VÀ SETTER MỚI (Lỗi của bạn nằm ở đây)
     public boolean isSelected() { return isSelected; }
     public void setSelected(boolean selected) { isSelected = selected; }
 }

@@ -112,7 +112,6 @@ public class MenuActivity extends AppCompatActivity {
         autoCompleteSearch.setOnClickListener(v -> startActivity(new Intent(this, SearchActivity.class)));
 
         // Các nút Toolbar
-        findViewById(R.id.btnMenuToggle).setOnClickListener(v -> Toast.makeText(this, "Tính năng đang phát triển", Toast.LENGTH_SHORT).show());
         findViewById(R.id.btnNotification).setOnClickListener(v -> Toast.makeText(this, "Không có thông báo mới", Toast.LENGTH_SHORT).show());
         findViewById(R.id.btnChatbot).setOnClickListener(v -> startActivity(new Intent(this, ChatbotActivity.class)));
     }

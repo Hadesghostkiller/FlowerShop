@@ -56,12 +56,10 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        // Sử dụng layout item_flower_search (dạng danh sách, không ảnh)
         adapter = new FlowerAdapter(
                 flower -> Toast.makeText(this, "Đã thêm " + flower.flowerName, Toast.LENGTH_SHORT).show(),
                 R.layout.item_flower_search
         );
-        // Thay đổi sang LinearLayoutManager để hiển thị dạng danh sách
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
     }
@@ -83,13 +81,8 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void showDefaultItems() {
-        tvTitle.setText("Mặt hàng điển hình");
-        List<SupabaseFlower> defaultList = new ArrayList<>();
-        int limit = Math.min(10, allFlowers.size());
-        for (int i = 0; i < limit; i++) {
-            defaultList.add(allFlowers.get(i));
-        }
-        adapter.setFlowersFromSupabase(defaultList);
+        tvTitle.setText("Tất cả (" + allFlowers.size() + ")");
+        adapter.setFlowersFromSupabase(allFlowers);
     }
 
     private void filter(String text) {
@@ -106,7 +99,7 @@ public class SearchActivity extends AppCompatActivity {
         if (filteredList.isEmpty()) {
             tvTitle.setText("Không tìm thấy mặt hàng phù hợp");
         } else {
-            tvTitle.setText("Kết quả tìm kiếm cho: " + text);
+            tvTitle.setText("Tất cả (" + filteredList.size() + ")");
         }
         adapter.setFlowersFromSupabase(filteredList);
     }

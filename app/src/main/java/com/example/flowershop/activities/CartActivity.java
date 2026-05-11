@@ -44,7 +44,8 @@ public class CartActivity extends AppCompatActivity {
     private String currentUserId;
     private FirebaseAuth mAuth;
     private boolean isProgrammaticChange = false;
-    private double totalPrice = 0; // Đã giữ lại từ nhánh vy để tính tiền
+    private double totalPrice = 0;
+    private int buyNowFlowerId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +63,8 @@ public class CartActivity extends AppCompatActivity {
             return;
         }
 
+        buyNowFlowerId = getIntent().getIntExtra("buy_now_flower_id", -1);
+
         initViews();
         loadCartData();
     }
@@ -69,7 +72,8 @@ public class CartActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadCartData();
+        // Không gọi loadCartData() ở đây nếu đã gọi ở onCreate để tránh xung đột logic buyNow
+        // Hoặc đảm bảo logic buyNow vẫn chạy được.
     }
 
     private void initViews() {
@@ -124,14 +128,22 @@ public class CartActivity extends AppCompatActivity {
                             List<CartItem> rawList = response.body();
                             cartItemList.clear();
 
-                            // Logic gộp các sản phẩm trùng ID hoa
                             HashMap<Integer, CartItem> mergedMap = new HashMap<>();
                             for (CartItem item : rawList) {
-                                item.setSelected(true);
+                                // Mặc định KHÔNG tích chọn
+                                item.setSelected(false);
+                                
+                                // Nếu là Buy Now từ trang chi tiết, chỉ tích chọn đúng sản phẩm đó
+                                if (buyNowFlowerId != -1 && item.getFlower_id() == buyNowFlowerId) {
+                                    item.setSelected(true);
+                                }
+
                                 int fId = item.getFlower_id();
                                 if (mergedMap.containsKey(fId)) {
                                     CartItem existingItem = mergedMap.get(fId);
                                     existingItem.setQuantity(existingItem.getQuantity() + item.getQuantity());
+                                    // Nếu cái mới được chọn thì cái cũ cũng nên được chọn (trường hợp gộp)
+                                    if (item.isSelected()) existingItem.setSelected(true);
                                 } else {
                                     mergedMap.put(fId, item);
                                 }
@@ -144,19 +156,18 @@ public class CartActivity extends AppCompatActivity {
                                 tvEmpty.setText("Giỏ hàng của bạn đang trống");
                                 tvEmpty.setVisibility(View.VISIBLE);
                                 cbSelectAll.setVisibility(View.GONE);
-                                if (tvTotalPrice != null) tvTotalPrice.setText("0 VND");
-                                if (tvTotalItems != null) tvTotalItems.setText("0");
+                                updateUI(0, 0);
                             } else {
                                 tvEmpty.setVisibility(View.GONE);
                                 cbSelectAll.setVisibility(View.VISIBLE);
-                                isProgrammaticChange = true;
-                                cbSelectAll.setChecked(true);
-                                isProgrammaticChange = false;
+                                updateSelectAllCheckboxState();
                                 calculateTotal();
+                                
+                                // Reset buyNowFlowerId sau khi đã xử lý xong để không ảnh hưởng lần reload sau
+                                buyNowFlowerId = -1;
                             }
                         } else {
                             tvEmpty.setText("Lỗi từ server: " + response.code());
-                            tvEmpty.setVisibility(View.VISIBLE);
                         }
                     } catch (Exception e) {
                         Log.e("CART_CRASH", "Lỗi hiển thị: ", e);
@@ -168,7 +179,6 @@ public class CartActivity extends AppCompatActivity {
             public void onFailure(Call<List<CartItem>> call, Throwable t) {
                 runOnUiThread(() -> {
                     tvEmpty.setText("Lỗi kết nối: \n" + t.getMessage());
-                    tvEmpty.setVisibility(View.VISIBLE);
                 });
             }
         });
@@ -191,45 +201,34 @@ public class CartActivity extends AppCompatActivity {
                         cartAdapter.notifyDataSetChanged();
                         calculateTotal();
                     });
-                } else {
-                    Toast.makeText(CartActivity.this, "Lỗi cập nhật số lượng", Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(CartActivity.this, "Lỗi kết nối mạng", Toast.LENGTH_SHORT).show();
-            }
+            public void onFailure(Call<Void> call, Throwable t) {}
         });
     }
 
     private void deleteItemFromCart(CartItem item) {
-        Toast.makeText(this, "Đang xóa...", Toast.LENGTH_SHORT).show();
-        SupabaseApi api = SupabaseClient.getApi();
-
-        String qUserId = "eq." + currentUserId;
-        String qFlowerId = "eq." + item.getFlower_id();
-
-        api.deleteCartItem(qUserId, qFlowerId).enqueue(new Callback<Void>() {
+        SupabaseClient.getApi().deleteCartItem("eq." + currentUserId, "eq." + item.getFlower_id())
+                .enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(CartActivity.this, "Đã xóa sản phẩm", Toast.LENGTH_SHORT).show();
                     loadCartData();
-                } else {
-                    Toast.makeText(CartActivity.this, "Lỗi khi xóa: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(CartActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+            public void onFailure(Call<Void> call, Throwable t) {}
         });
     }
 
     private void updateSelectAllCheckboxState() {
-        if (cartItemList.isEmpty()) return;
+        if (cartItemList.isEmpty()) {
+            isProgrammaticChange = true;
+            cbSelectAll.setChecked(false);
+            isProgrammaticChange = false;
+            return;
+        }
         boolean allSelected = true;
         for (CartItem item : cartItemList) {
             if (!item.isSelected()) {
@@ -244,56 +243,33 @@ public class CartActivity extends AppCompatActivity {
     }
 
     private void calculateTotal() {
-        try {
-            int totalItems = 0;
-            totalPrice = 0;
-
-            for (CartItem item : cartItemList) {
-                if (item.isSelected()) {
-                    totalItems += item.getQuantity();
-                    if (item.getFlowers() != null) {
-                        totalPrice += (item.getQuantity() * item.getFlowers().price);
-                    }
+        int totalItems = 0;
+        totalPrice = 0;
+        for (CartItem item : cartItemList) {
+            if (item.isSelected()) {
+                totalItems += item.getQuantity();
+                if (item.getFlowers() != null) {
+                    totalPrice += (item.getQuantity() * item.getFlowers().price);
                 }
             }
-
-            // Cập nhật giao diện an toàn (giữ logic của vy)
-            if (tvTotalItems != null) {
-                tvTotalItems.setText(String.valueOf(totalItems));
-            }
-            if (tvTotalPrice != null) {
-                tvTotalPrice.setText(String.format("%,.0f VND", totalPrice));
-            }
-
-        } catch (Exception e) {
-            Log.e("CART_CRASH", "Lỗi tính tổng: ", e);
         }
+        updateUI(totalItems, totalPrice);
+    }
+
+    private void updateUI(int items, double price) {
+        if (tvTotalItems != null) tvTotalItems.setText(String.valueOf(items));
+        if (tvTotalPrice != null) tvTotalPrice.setText(String.format("%,.0f VND", price));
     }
 
     private void checkout() {
-        boolean hasSelectedItem = false;
-        for (CartItem item : cartItemList) {
-            if (item.isSelected()) {
-                hasSelectedItem = true;
-                break;
-            }
-        }
-
-        if (cartItemList.isEmpty()) {
-            Toast.makeText(this, "Giỏ hàng đang trống!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (!hasSelectedItem) {
-            Toast.makeText(this, "Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         ArrayList<CartItem> selectedItems = new ArrayList<>();
         for (CartItem item : cartItemList) {
-            if (item.isSelected()) {
-                selectedItems.add(item);
-            }
+            if (item.isSelected()) selectedItems.add(item);
+        }
+
+        if (selectedItems.isEmpty()) {
+            Toast.makeText(this, "Vui lòng chọn sản phẩm!", Toast.LENGTH_SHORT).show();
+            return;
         }
 
         Intent intent = new Intent(this, CheckoutActivity.class);
