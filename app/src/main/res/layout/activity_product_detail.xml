@@ -85,6 +85,7 @@
                     android:orientation="horizontal">
 
                     <ImageButton
+                        android:id="@+id/btnRemoveQty"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:background="@drawable/bg_circle_pink"
@@ -92,6 +93,7 @@
                         app:tint="@android:color/white" />
 
                     <TextView
+                        android:id="@+id/tvQuantity"
                         android:layout_width="40dp"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -101,6 +103,7 @@
                         android:textStyle="bold" />
 
                     <ImageButton
+                        android:id="@+id/btnAddQty"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:background="@drawable/bg_circle_pink"
@@ -118,6 +121,7 @@
                 android:weightSum="2">
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSelectDate"
                     android:layout_width="0dp"
                     android:layout_height="54dp"
                     android:layout_marginEnd="8dp"
@@ -135,6 +139,7 @@
                     app:iconTint="@android:color/white" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSelectTime"
                     android:layout_width="0dp"
                     android:layout_height="54dp"
                     android:layout_marginStart="8dp"
@@ -160,8 +165,11 @@
                 android:background="#EEEEEE" />
 
             <RelativeLayout
+                android:id="@+id/layoutCardMessage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
                 android:paddingVertical="16dp">
 
                 <TextView
@@ -172,6 +180,7 @@
                     android:textSize="15sp" />
 
                 <ImageView
+                    android:id="@+id/ivArrowCard"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_alignParentEnd="true"
@@ -181,14 +190,29 @@
                     app:tint="@android:color/white" />
             </RelativeLayout>
 
+            <EditText
+                android:id="@+id/etCardMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:hint="Nhập lời nhắn của bạn..."
+                android:minLines="2"
+                android:paddingBottom="12dp"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="#EEEEEE" />
 
             <RelativeLayout
+                android:id="@+id/layoutSpecialInstructions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
                 android:paddingVertical="16dp">
 
                 <TextView
@@ -199,6 +223,7 @@
                     android:textSize="15sp" />
 
                 <ImageView
+                    android:id="@+id/ivArrowSpecial"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_alignParentEnd="true"
@@ -208,6 +233,18 @@
                     app:tint="@android:color/white" />
             </RelativeLayout>
 
+            <EditText
+                android:id="@+id/etSpecialInstructions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:hint="Nhập chú ý đặc biệt..."
+                android:minLines="2"
+                android:paddingBottom="12dp"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -216,6 +253,7 @@
                 android:weightSum="2">
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAddToBag"
                     android:layout_width="0dp"
                     android:layout_height="64dp"
                     android:layout_marginEnd="8dp"
@@ -233,6 +271,7 @@
                     app:iconTint="@android:color/white" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBuyNow"
                     android:layout_width="0dp"
                     android:layout_height="64dp"
                     android:layout_marginStart="8dp"

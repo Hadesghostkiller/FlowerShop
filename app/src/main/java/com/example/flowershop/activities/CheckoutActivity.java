@@ -27,7 +27,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -204,6 +206,7 @@ public class CheckoutActivity extends AppCompatActivity {
         final int[] completedRequests = {0};
 
         for (CartItem item : selectedItems) {
+            final CartItem currentItem = item;
             Order order = new Order();
             order.user_id = userId;
             order.customer_name = customerName;
@@ -213,16 +216,20 @@ public class CheckoutActivity extends AppCompatActivity {
             order.status = "Hoàn tất";
 
             // Lưu thông tin chi tiết của DUY NHẤT sản phẩm này
-            String flowerName = (item.getFlowers() != null) ? item.getFlowers().flowerName : "Hoa";
-            order.order_details = flowerName + " (x" + item.getQuantity() + ")";
+            String flowerName = (currentItem.getFlowers() != null) ? currentItem.getFlowers().flowerName : "Hoa";
+            order.order_details = flowerName + " (x" + currentItem.getQuantity() + ")";
 
             // Tính số tiền riêng cho sản phẩm này (Số lượng x Đơn giá)
-            double itemPrice = (item.getFlowers() != null) ? item.getFlowers().price : 0;
-            order.total_amount = item.getQuantity() * itemPrice;
+            double itemPrice = (currentItem.getFlowers() != null) ? currentItem.getFlowers().price : 0;
+            order.total_amount = currentItem.getQuantity() * itemPrice;
 
             SupabaseClient.getApi().createOrder("return=representation", order).enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.isSuccessful()) {
+                        // Cập nhật số lượng tồn kho và lượt mua cho sản phẩm này
+                        updateFlowerStock(currentItem);
+                    }
                     completedRequests[0]++;
                     checkAndFinish(completedRequests[0], totalRequests);
                 }
@@ -234,6 +241,36 @@ public class CheckoutActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void updateFlowerStock(CartItem item) {
+        if (item.getFlowers() == null) return;
+
+        int newStock = item.getFlowers().stock - item.getQuantity();
+        int newLuotMua = item.getFlowers().luotMua + item.getQuantity();
+
+        // Đảm bảo tồn kho không âm
+        if (newStock < 0) newStock = 0;
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("stock", newStock);
+        updates.put("luot_mua", newLuotMua);
+
+        SupabaseClient.getApi().updateFlower("eq." + item.getFlower_id(), updates).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Log.d("CHECKOUT", "Cập nhật kho thành công cho: " + item.getFlowers().flowerName);
+                } else {
+                    Log.e("CHECKOUT", "Lỗi cập nhật kho: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e("CHECKOUT", "Lỗi mạng khi cập nhật kho: " + t.getMessage());
+            }
+        });
     }
 
     private void checkAndFinish(int current, int total) {

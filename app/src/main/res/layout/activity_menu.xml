@@ -25,15 +25,15 @@
             android:paddingBottom="8dp">
 
             <ImageView
-                android:id="@+id/btnMenuToggle"
+                android:id="@+id/btnNotification"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_menu"
-                android:contentDescription="Menu"
-                app:tint="#E91E63"
+                android:contentDescription="Notifications"
+                android:src="@drawable/ic_notification"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="@+id/ivLogo" />
+                app:layout_constraintBottom_toBottomOf="@+id/ivLogo"
+                app:tint="#E91E63" />
 
             <ImageView
                 android:id="@+id/ivLogo"
@@ -45,18 +45,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
-
-            <ImageView
-                android:id="@+id/btnNotification"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginEnd="16dp"
-                android:contentDescription="Notifications"
-                android:src="@drawable/ic_notification"
-                app:layout_constraintBottom_toBottomOf="@+id/ivLogo"
-                app:layout_constraintEnd_toStartOf="@+id/btnChatbot"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="#E91E63" />
 
             <ImageView
                 android:id="@+id/btnChatbot"
@@ -201,27 +189,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/browse_occasions"
-                android:textColor="#DE4C8A"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="12dp"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvOccasions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:paddingHorizontal="12dp"
-                android:orientation="horizontal"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_category_occasion"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="@string/best_seller"
                 android:textColor="#DE4C8A"
                 android:textSize="16sp"
@@ -243,9 +210,6 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Giữ nguyên phần AppBar và ScrollView ở trên -->
-
-    <!-- Giữ nguyên phần AppBar và ScrollView ở trên, chỉ thay thế CardView bottomNavCard -->
     <androidx.cardview.widget.CardView
         android:id="@+id/bottomNavCard"
         android:layout_width="match_parent"
@@ -266,9 +230,8 @@
             android:gravity="center"
             android:orientation="horizontal"
             android:paddingHorizontal="10dp"
-            android:animateLayoutChanges="true"> <!-- Tự động làm mượt khi thay đổi layout -->
+            android:animateLayoutChanges="true">
 
-            <!-- HOME TAB -->
             <LinearLayout
                 android:id="@+id/navHomeContainer"
                 android:layout_width="wrap_content"
@@ -298,7 +261,6 @@
                     android:visibility="visible" />
             </LinearLayout>
 
-            <!-- WISHLIST TAB -->
             <LinearLayout
                 android:id="@+id/navWishlistContainer"
                 android:layout_width="wrap_content"
@@ -326,7 +288,6 @@
                     android:visibility="gone" />
             </LinearLayout>
 
-            <!-- CART TAB -->
             <LinearLayout
                 android:id="@+id/navCartContainer"
                 android:layout_width="wrap_content"
@@ -354,7 +315,6 @@
                     android:visibility="gone" />
             </LinearLayout>
 
-            <!-- PROFILE TAB -->
             <LinearLayout
                 android:id="@+id/navProfileContainer"
                 android:layout_width="wrap_content"
