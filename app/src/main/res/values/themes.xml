@@ -1,8 +1,14 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.FlowerShop" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">#E91E63</item>
+        <item name="colorPrimaryVariant">#C2185B</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+
+        <item name="android:statusBarColor">#E35A8C</item>
+
+        <item name="android:windowLightStatusBar">false</item>
+
+        <item name="android:navigationBarColor">#FFFFFF</item>
     </style>
 
     <style name="Theme.FlowerShop" parent="Base.Theme.FlowerShop" />
