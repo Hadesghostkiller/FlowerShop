@@ -61,7 +61,7 @@ app/src/main/java/com/example/flowershop/
 
 1. **Clone project:**
    ```bash
-   git clone <repository_url>
+   git clone https://github.com/Hadesghostkiller/FlowerShop
    ```
 2. **Cấu hình Firebase:**
    - Vào bên trong Firebase, tạo new project, enable authentications, enable google sau đó thêm tệp `google-services.json` vào thư mục `app/`.
@@ -71,4 +71,6 @@ app/src/main/java/com/example/flowershop/
    - Thêm API Key của Groq vào `GroqApiService.java`.
 5. **Build dự án:**
    - Mở dự án bằng Android Studio và đồng bộ Gradle.
+
+## Repos được build bởi 4thanggay
 
