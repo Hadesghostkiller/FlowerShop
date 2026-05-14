@@ -6,8 +6,8 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SupabaseClient {
-    private static final String BASE_URL = "https://iwqklcrgfjngmvpzxmsy.supabase.co/";
-    private static final String ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3cWtsY3JnZmpuZ212cHp4bXN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MDcyMjIsImV4cCI6MjA5MzM4MzIyMn0.-gcVvphhyZ1NUH_EszFxfWxMJ9lxDaBx7kuA9yVIIUM";
+    private static final String BASE_URL = "YOUR_SUPABASE_URL/REST/V1/";
+    private static final String ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
 
     private static Retrofit retrofit = null;
 
